@@ -20,9 +20,15 @@ def js(value):
     return json.dumps(value, ensure_ascii=False).replace('</', '<\\/')
 
 
-manifest = json.loads(read(os.path.join(TAGS_DIR, 'manifest.json')))
-tags = [{'n': m['n'], 'label': f"{m['n']}. {m['name']}" if m['n'] else m['name'], 'desc': m['desc'],
-         'html': read(os.path.join(TAGS_DIR, 'plain', m['file']))} for m in manifest]
+manifest = sorted(json.loads(read(os.path.join(TAGS_DIR, 'manifest.json'))), key=lambda m: m['n'])
+tags = []
+for m in manifest:
+    t = {'n': m['n'], 'label': f"{m['n']}. {m['name']}" if m['n'] else m['name'], 'desc': m['desc']}
+    if 'levels' in m:      # scene tags come in several heart densities
+        t['levels'] = {lvl: read(os.path.join(TAGS_DIR, 'plain', f)) for lvl, f in m['levels'].items()}
+    else:
+        t['html'] = read(os.path.join(TAGS_DIR, 'plain', m['file']))
+    tags.append(t)
 page = (read(os.path.join(ROOT, 'tools', 'index.template.html'))
         .replace('@@TAGS@@', js(tags))
         .replace('@@ROLL@@', js(read(os.path.join(TAGS_DIR, 'roll.html')))))

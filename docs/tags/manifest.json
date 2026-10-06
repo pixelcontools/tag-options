@@ -142,5 +142,55 @@
   "name": "Pixel Dawn Hearts",
   "desc": "Pixel Dawn with the guild hearts (yellow and blue) floating around and over the banner, pulsing like your current tag does.",
   "file": "23_pixel_dawn_hearts.html"
+ },
+ {
+  "n": 24,
+  "name": "Pixel Night",
+  "desc": "The skyline after dark: crescent moon, shooting star, glowing wordmark and lit windows.",
+  "levels": {
+   "none": "24_pixel_night_hearts_none.html",
+   "few": "24_pixel_night_hearts_few.html",
+   "many": "24_pixel_night_hearts_many.html"
+  }
+ },
+ {
+  "n": 25,
+  "name": "Pixel Arcade",
+  "desc": "Retro synthwave: striped sun, neon grid floor, scanlines and a pink-glow wordmark.",
+  "levels": {
+   "none": "25_pixel_arcade_hearts_none.html",
+   "few": "25_pixel_arcade_hearts_few.html",
+   "many": "25_pixel_arcade_hearts_many.html"
+  }
+ },
+ {
+  "n": 26,
+  "name": "Pixel Space",
+  "desc": "A starfield with nebula clouds, a ringed gold planet and a blue moon behind the wordmark.",
+  "levels": {
+   "none": "26_pixel_space_hearts_none.html",
+   "few": "26_pixel_space_hearts_few.html",
+   "many": "26_pixel_space_hearts_many.html"
+  }
+ },
+ {
+  "n": 28,
+  "name": "Pixel City Pop",
+  "desc": "Retro Japan, 80s city pop: pastel sunset over a Tokyo skyline and tower, palm trees, katakana (ピクセルコンズ) down the side.",
+  "levels": {
+   "none": "28_pixel_city_pop_hearts_none.html",
+   "few": "28_pixel_city_pop_hearts_few.html",
+   "many": "28_pixel_city_pop_hearts_many.html"
+  }
+ },
+ {
+  "n": 27,
+  "name": "Pixel Sky",
+  "desc": "Bright sky islands with trees, a little red-roofed house and drifting clouds.",
+  "levels": {
+   "none": "27_pixel_sky_hearts_none.html",
+   "few": "27_pixel_sky_hearts_few.html",
+   "many": "27_pixel_sky_hearts_many.html"
+  }
  }
 ]

@@ -34,6 +34,9 @@ body.hl-only .card:not(:hover) .stage *{animation-play-state:paused!important}
 .lab{padding-right:92px}
 .acts{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:4px}
 .acts button{font-size:11px;padding:2px 8px;white-space:nowrap}
+.acts select,#mhearts{font:inherit;font-size:11px;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 4px}
+#mhearts{font-size:12px}
+.lab{min-height:84px}
 .lab b{font-size:14px}.lab span{color:var(--muted);font-size:12px;line-height:1.4}
 footer{max-width:1300px;margin:0 auto;padding:8px 16px 40px;color:var(--muted);font-size:12px}
 footer a{color:inherit}
@@ -72,7 +75,8 @@ footer a{color:inherit}
 <div id="modal"><div id="dlg" role="dialog" aria-modal="true">
   <div class="hd"><div><b id="mtitle"></b><span id="mdesc"></span></div><button id="x" aria-label="Close">&times;</button></div>
   <div id="big"></div>
-  <div id="mrow"><label class="sw"><input type="checkbox" id="mroll"> Include Roll image</label></div>
+  <div id="mrow"><label class="sw"><input type="checkbox" id="mroll"> Include Roll image</label>
+    <label class="sw" id="mhwrap">Hearts <select id="mhearts"></select></label></div>
   <textarea id="code" readonly spellcheck="false"></textarea>
   <div id="mfoot"><button id="copy">Copy HTML</button><button id="dl">Download .html</button><span id="mcount"></span></div>
 </div></div>
@@ -82,7 +86,11 @@ const TAGS = @@TAGS@@;
 const ROLL = @@ROLL@@;
 const withRoll = h => '<div style="display: inline-flex; align-items: center">' + h +
   '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + ROLL + '</span></div>';
-const html = (t, roll) => roll ? withRoll(t.html) : t.html;
+const LEVEL_LABEL = { none: 'no hearts', few: 'few hearts', many: 'many hearts' };
+const tagHtml = t => t.levels ? t.levels[t.lvl || 'few'] : t.html;
+const html = (t, roll) => roll ? withRoll(tagHtml(t)) : tagHtml(t);
+const levelSelect = cls => '<select class="' + cls + '" title="How many hearts float around the tag">' +
+  Object.keys(LEVEL_LABEL).map(k => '<option value="' + k + '">' + '♥ ' + LEVEL_LABEL[k] + '</option>').join('') + '</select>';
 
 
 const $ = s => document.querySelector(s);
@@ -112,7 +120,7 @@ function renderGrid() {
   TAGS.forEach(t => {
     const c = document.createElement('div'); c.className = 'card';
     c.innerHTML = '<div class="stage"></div><div class="lab"><b>' + t.label + '</b><span></span></div>' +
-      '<div class="acts"><button class="cc">Copy HTML</button><button class="cd">Download</button></div>';
+      '<div class="acts">' + (t.levels ? levelSelect('hs') : '') + '<button class="cc">Copy HTML</button><button class="cd">Download</button></div>';
     c.querySelector('span').textContent = t.desc;
     grid.appendChild(c);
     const stage = c.querySelector('.stage'); c._rest = REST[t.n] || REST_DEFAULT;
@@ -121,6 +129,16 @@ function renderGrid() {
     c.onmouseleave = () => { if (hl) setSvgPaused(stage, true, c._rest); };
     c.onclick = () => openModal(t);
     // quick actions on the card itself; they always use the real (box-shadow) HTML, never the grid's bitmap preview
+    const hs = c.querySelector('.hs');
+    if (hs) {
+      hs.value = t.lvl || 'few';
+      hs.onclick = e => e.stopPropagation();
+      hs.onchange = e => {
+        t.lvl = hs.value; mount(stage, html(t, roll));
+        if (hl) setSvgPaused(stage, !c.matches(':hover'), c._rest);
+        if (current === t && $('#modal').classList.contains('open')) { $('#mhearts').value = t.lvl; refreshModal(); }
+      };
+    }
     c.querySelector('.cc').onclick = e => { e.stopPropagation(); copyText(html(t, roll), e.target); };
     c.querySelector('.cd').onclick = e => { e.stopPropagation(); downloadHtml(t, roll); };
   });
@@ -128,6 +146,9 @@ function renderGrid() {
 }
 function openModal(t) {
   current = t; mroll.checked = roll;
+  $('#mhwrap').style.display = t.levels ? '' : 'none';
+  $('#mhearts').innerHTML = Object.keys(LEVEL_LABEL).map(k => '<option value="' + k + '">' + LEVEL_LABEL[k] + '</option>').join('');
+  $('#mhearts').value = t.lvl || 'few';
   $('#mtitle').textContent = t.label; $('#mdesc').textContent = t.desc;
   $('#modal').classList.add('open'); refreshModal();
 }
@@ -148,6 +169,7 @@ function setRoll(v) {
   if (current && $('#modal').classList.contains('open')) refreshModal();
 }
 mroll.onchange = () => setRoll(mroll.checked);
+$('#mhearts').onchange = e => { current.lvl = e.target.value; renderGrid(); refreshModal(); };
 rollToggle.onchange = () => setRoll(rollToggle.checked);
 $('#hlToggle').onchange = e => { hl = e.target.checked; applyHighlightMode(); };
 async function copyText(text, btn) {
@@ -161,7 +183,7 @@ async function copyText(text, btn) {
 }
 function fileName(t, withRollFlag) {
   const name = t.label.replace(/^\d+\.\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-  return String(t.n).padStart(2, '0') + '_' + name + (withRollFlag ? '_with_roll' : '') + '.html';
+  return String(t.n).padStart(2, '0') + '_' + name + (t.levels ? '_hearts_' + (t.lvl || 'few') : '') + (withRollFlag ? '_with_roll' : '') + '.html';
 }
 function downloadHtml(t, withRollFlag) {
   const blob = new Blob([html(t, withRollFlag)], { type: 'text/html;charset=utf-8' });
