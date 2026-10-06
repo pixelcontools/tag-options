@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PIXELCONS Tag Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* The site's guild tags reference MapLibre's built-in pulse keyframes by name; geopixels.net already has them. */
+@keyframes maplibregl-user-location-dot-pulse{0%{transform:scale(1);opacity:1}70%{transform:scale(3);opacity:0}to{transform:scale(1);opacity:0}}
+:root{--bg:#0b0b0f;--fg:#f2f3f5;--card:#15151c;--line:rgba(128,128,128,.35);--muted:rgba(242,243,245,.7)}
+body.light{--bg:#ebedef;--fg:#060607;--card:#f6f7f8;--muted:rgba(6,6,7,.65)}
+body.white{--bg:#fff;--fg:#060607;--card:#f6f7f8;--muted:rgba(6,6,7,.65)}
+*{box-sizing:border-box}
+html,body{margin:0;font-family:"Noto Sans",system-ui,sans-serif}
+body{background:var(--bg);color:var(--fg)}
+header{padding:20px 16px 4px;max-width:1300px;margin:0 auto}
+h1{margin:0 0 4px;font-size:22px}
+header p{margin:0;color:var(--muted);font-size:14px;line-height:1.5}
+#bar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:10px 16px;margin-top:12px;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);font-size:13px}
+#bar .grp{display:flex;align-items:center;gap:6px}
+button{font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:6px;padding:4px 11px;cursor:pointer}
+button.on{background:#5865f2;border-color:#5865f2;color:#fff}
+label.sw{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+#grid{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s}
+.card:hover{transform:translateY(-2px);border-color:#5865f2}
+.stage{height:150px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.stage>.fit{transform-origin:center;flex:none}
+.lab{padding:9px 12px;border-top:1px solid var(--line);font-size:13px;display:flex;flex-direction:column;gap:2px}
+.lab b{font-size:14px}.lab span{color:var(--muted);font-size:12px;line-height:1.4}
+footer{max-width:1300px;margin:0 auto;padding:8px 16px 40px;color:var(--muted);font-size:12px}
+footer a{color:inherit}
+/* modal */
+#modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:16px}
+#modal.open{display:flex}
+#dlg{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:12px;width:min(760px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden}
+#dlg .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px 8px}
+#dlg .hd b{font-size:16px}#dlg .hd div span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+#x{border:0;font-size:22px;line-height:1;padding:0 6px}
+#big{background:var(--bg);margin:0 16px;border:1px solid var(--line);border-radius:8px;height:190px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+#big>.fit{transform-origin:center;flex:none}
+#mrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px 0;font-size:13px}
+#code{margin:8px 16px;width:calc(100% - 32px);height:140px;resize:vertical;font:12px/1.4 ui-monospace,Consolas,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px}
+#mfoot{padding:0 16px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
+#copy{background:#5865f2;border-color:#5865f2;color:#fff;font-weight:500;padding:6px 16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>PIXELCONS Tag Options</h1>
+  <p>Animated guild-tag ideas for geopixels.net. Tell us the number(s) you like. Click any tag to open it and copy its HTML,
+  then paste it into your guild settings &rarr; <i>Tag</i> field.</p>
+</header>
+<div id="bar">
+  <div class="grp"><label class="sw"><input type="checkbox" id="rollToggle"> Include Roll image</label></div>
+  <div class="grp"><span>Background:</span>
+    <button data-bg="" class="on">dark</button><button data-bg="light">#EBEDEF</button><button data-bg="white">white</button></div>
+</div>
+<div id="grid"></div>
+<footer>Tags use only inline SVG animation and the site's own built-in pulse keyframes. No scripts. Source and tag files:
+  <a href="https://github.com/pixelcontools/tag-options">github.com/pixelcontools/tag-options</a> (<code>docs/tags/</code>).</footer>
+
+<div id="modal"><div id="dlg" role="dialog" aria-modal="true">
+  <div class="hd"><div><b id="mtitle"></b><span id="mdesc"></span></div><button id="x" aria-label="Close">&times;</button></div>
+  <div id="big"></div>
+  <div id="mrow"><label class="sw"><input type="checkbox" id="mroll"> Include Roll image</label></div>
+  <textarea id="code" readonly spellcheck="false"></textarea>
+  <div id="mfoot"><button id="copy">Copy HTML</button><span id="mcount"></span></div>
+</div></div>
+
+<script>
+const TAGS = @@TAGS@@;
+const ROLL = @@ROLL@@;
+const withRoll = h => '<div style="display: inline-flex; align-items: center">' + h +
+  '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + ROLL + '</span></div>';
+const html = (t, roll) => roll ? withRoll(t.html) : t.html;
+
+const $ = s => document.querySelector(s);
+const grid = $('#grid'), rollToggle = $('#rollToggle'), mroll = $('#mroll');
+let roll = false, current = null;
+
+function mount(host, markup, maxW) {
+  host.innerHTML = '<div class="fit">' + markup + '</div>';
+  const fit = host.firstChild;
+  const avail = (maxW || host.clientWidth) - 24, w = fit.offsetWidth || 1;
+  fit.style.transform = w > avail ? 'scale(' + (avail / w) + ')' : '';
+}
+function renderGrid() {
+  grid.innerHTML = '';
+  TAGS.forEach(t => {
+    const c = document.createElement('div'); c.className = 'card';
+    c.innerHTML = '<div class="stage"></div><div class="lab"><b>' + t.label + '</b><span></span></div>';
+    c.querySelector('span').textContent = t.desc;
+    grid.appendChild(c);
+    mount(c.querySelector('.stage'), html(t, roll));
+    c.onclick = () => openModal(t);
+  });
+}
+function openModal(t) {
+  current = t; mroll.checked = roll;
+  $('#mtitle').textContent = t.label; $('#mdesc').textContent = t.desc;
+  $('#modal').classList.add('open'); refreshModal();
+}
+function refreshModal() {
+  const h = html(current, mroll.checked);
+  mount($('#big'), h, $('#big').clientWidth);
+  $('#code').value = h; $('#mcount').textContent = h.length.toLocaleString() + ' characters';
+  $('#copy').textContent = 'Copy HTML';
+}
+const close = () => $('#modal').classList.remove('open');
+$('#x').onclick = close;
+$('#modal').onclick = e => { if (e.target.id === 'modal') close(); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+// One shared setting: the top toggle and the modal checkbox always agree, so the code you copy matches the preview.
+function setRoll(v) {
+  roll = v; rollToggle.checked = v; mroll.checked = v;
+  renderGrid();
+  if (current && $('#modal').classList.contains('open')) refreshModal();
+}
+mroll.onchange = () => setRoll(mroll.checked);
+rollToggle.onchange = () => setRoll(rollToggle.checked);
+$('#copy').onclick = async () => {
+  const v = $('#code').value, b = $('#copy');
+  try { await navigator.clipboard.writeText(v); }
+  catch (_) { const a = $('#code'); a.select(); document.execCommand('copy'); }
+  b.textContent = 'Copied!';
+};
+document.querySelectorAll('[data-bg]').forEach(b => b.onclick = () => {
+  document.body.className = b.dataset.bg;
+  document.querySelectorAll('[data-bg]').forEach(x => x.classList.toggle('on', x === b));
+});
+window.addEventListener('resize', renderGrid);
+renderGrid();
+</script>
+</body>
+</html>
