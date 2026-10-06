@@ -130,5 +130,11 @@
   "name": "Spotlight",
   "desc": "A soft round spotlight drifts back and forth over the letters, lighting them white as it passes.",
   "file": "21_spotlight.html"
+ },
+ {
+  "n": 22,
+  "name": "Pixel Dawn",
+  "desc": "A pixel-art sunrise skyline banner with a chunky PIXELCONS wordmark and twinkling sparkles. One embedded PNG, so it stays light and sharp.",
+  "file": "22_pixel_dawn.html"
  }
 ]

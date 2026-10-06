@@ -84,25 +84,6 @@ const withRoll = h => '<div style="display: inline-flex; align-items: center">' 
   '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + ROLL + '</span></div>';
 const html = (t, roll) => roll ? withRoll(t.html) : t.html;
 
-/* Grid previews swap the Roll pixel art (6,000+ box-shadows per copy, which is what made the page lag) for a bitmap
-   drawn once on a canvas. The modal preview and the copied HTML always use the real box-shadow version. */
-let rollImg = null;
-function rollBitmapHtml() {
-  if (rollImg) return rollImg;
-  const m = ROLL.match(/box-shadow: ([^"]*)"/);
-  const cv = document.createElement('canvas'); cv.width = 97; cv.height = 84;
-  const g = cv.getContext('2d');
-  m[1].split(',').forEach(p => {
-    const [x, y, col] = p.trim().split(' ');
-    g.fillStyle = col; g.fillRect(parseInt(x), parseInt(y), 1, 1);
-  });
-  rollImg = '<img src="' + cv.toDataURL() + '" width="97" height="84" style="display: block; image-rendering: pixelated" alt="">';
-  return rollImg;
-}
-const previewHtml = (t, roll) => roll
-  ? '<div style="display: inline-flex; align-items: center">' + t.html +
-    '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + rollBitmapHtml() + '</span></div>'
-  : t.html;
 
 const $ = s => document.querySelector(s);
 const grid = $('#grid'), rollToggle = $('#rollToggle'), mroll = $('#mroll');
@@ -135,7 +116,7 @@ function renderGrid() {
     c.querySelector('span').textContent = t.desc;
     grid.appendChild(c);
     const stage = c.querySelector('.stage'); c._rest = REST[t.n] || REST_DEFAULT;
-    mount(stage, previewHtml(t, roll));
+    mount(stage, html(t, roll));
     c.onmouseenter = () => { if (hl) setSvgPaused(stage, false); };
     c.onmouseleave = () => { if (hl) setSvgPaused(stage, true, c._rest); };
     c.onclick = () => openModal(t);
