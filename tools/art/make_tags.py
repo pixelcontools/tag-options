@@ -16,7 +16,7 @@ SCENES = [
     ('night.png', 24, 'Pixel Night', 'The skyline after dark: crescent moon, shooting star, glowing wordmark and lit windows.', (27, 52)),
     ('arcade.png', 25, 'Pixel Arcade', 'Retro synthwave: striped sun, neon grid floor, scanlines and a pink-glow wordmark.', (13, 38)),
     ('space.png', 26, 'Pixel Space', 'A starfield with nebula clouds, a ringed gold planet and a blue moon behind the wordmark.', (27, 52)),
-    ('citypop.png', 28, 'Pixel City Pop', 'Retro Japan, 80s city pop: pastel sunset over a Tokyo skyline and tower, palm trees, katakana (ピクセルコンズ) down the side.', (12, 37)),
+    ('citypop.png', 28, 'Pixel City Pop', 'Retro Japan, 80s city pop: a white Countach cruises an elevated road above a pastel Tokyo skyline, toward a sign with a crying face and an arrow. Katakana (ピクセルコンズ) runs down the side.', (12, 37)),
     ('sky.png', 27, 'Pixel Sky', 'Bright sky islands with trees, a little red-roofed house and drifting clouds.', (25, 50)),
 ]
 

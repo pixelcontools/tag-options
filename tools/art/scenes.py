@@ -320,14 +320,7 @@ def citypop():
         d.line([tx - round(half), y, tx + round(half), y], fill=col + (255,))
     d.rectangle([tx - 6, 36, tx + 6, 38], fill=(255, 250, 245, 255)); d.rectangle([tx - 4, 22, tx + 4, 23], fill=(255, 250, 245, 255))
     d.line([tx, 2, tx, 8], fill=(231, 29, 54, 255))
-    # sea with pink sun glitter and horizon line
-    d.rectangle([0, hz, W, H], fill=(70, 196, 206, 255))
-    for k in range(hz + 2, H, 3):
-        d.line([0, k, W, k], fill=(104, 214, 220, 255))
-    for k, (yy, ww) in enumerate(((hz + 2, 40), (hz + 5, 30), (hz + 8, 22), (hz + 11, 14), (hz + 14, 8))):
-        d.line([sx - ww, yy, sx + ww, yy], fill=(255, 175, 195, 255))
-    d.line([0, hz, W, hz], fill=(255, 255, 255, 255))
-    # palm trees
+    # palm trees, planted on the city side of the guardrail
     def palm(bx, by, lean, h=34):
         pts = []
         for i in range(h):
@@ -341,12 +334,56 @@ def citypop():
                 fx = cx + math.cos(rad) * t
                 fy = cy + math.sin(rad) * t * 0.55 + (t * t) / 28
                 d.rectangle([round(fx), round(fy), round(fx) + 1, round(fy)], fill=((26, 120, 90) if t % 3 else (60, 170, 110)) + (255,))
-    palm(34, hz + 9, 0.35, 36)
-    palm(268, hz + 12, -0.3, 40)
+    palm(34, hz + 4, 0.35, 36)
+    palm(268, hz + 4, -0.3, 40)
+    # elevated road in the foreground: guardrail, asphalt, edge lines, dashed centre line
+    d.rectangle([0, hz + 2, W, H], fill=(74, 78, 116, 255))
+    for k in range(hz + 2, H, 4):
+        d.line([0, k, W, k], fill=(82, 86, 126, 255))
+    d.rectangle([0, hz + 1, W, hz + 2], fill=(226, 230, 244, 255))             # rail top
+    d.line([0, hz + 3, W, hz + 3], fill=(150, 156, 190, 255))                   # rail shadow on the road
+    for px_ in range(2, W, 9):
+        d.rectangle([px_, hz - 2, px_ + 1, hz + 3], fill=(176, 182, 214, 255))  # rail posts
+    d.line([0, hz + 6, W, hz + 6], fill=(240, 244, 255, 255))                   # near-side edge line
+    for dx in range(-4, W, 14):
+        d.rectangle([dx, 76, dx + 7, 76], fill=(255, 226, 120, 255))             # dashed centre line
+    d.line([0, H - 3, W, H - 3], fill=(240, 244, 255, 255))
+    # roadside sign: crying emoji + arrow pointing the way the car is heading (right)
+    d.rectangle([206, 56, 207, hz + 1], fill=(110, 114, 146, 255))
+    d.rounded_rectangle([188, 39, 226, 56], radius=2, fill=(255, 255, 255, 255), outline=BLUE + (255,))
+    CRY = ["...ooooo...", ".ooyyyyyoo.", "oyyyyyyyyyo", "oyeeyyyeeyo", "oytyyyyytyo", "oytyyyyytyo",
+           "oyyyymmmyyo", "oyyymmmmmyo", ".oyyyyyyyo.", "..ooyyyoo..", "....ooo...."]
+    CCOL = {'o': (178, 112, 0), 'y': (255, 208, 40), 'e': (96, 52, 12), 't': (90, 180, 255), 'm': (130, 36, 24)}
+    for j, row in enumerate(CRY):
+        for i, ch in enumerate(row):
+            if ch != '.':
+                px[191 + i, 42 + j] = CCOL[ch] + (255,)
+    d.rectangle([205, 46, 213, 49], fill=BLUE + (255,))
+    d.polygon([(212, 43), (212, 52), (222, 47.5)], fill=BLUE + (255,))
+    # white Lamborghini Countach (side view, facing right)
+    def countach(x0, y0):
+        d.ellipse([x0 + 3, y0 + 10, x0 + 43, y0 + 13], fill=(40, 42, 70, 255))       # ground shadow
+        body = [(2, 8), (2, 4), (9, 3), (17, 1), (27, 1), (34, 5), (46, 7), (46, 8), (44, 9), (4, 9)]
+        d.polygon([(x0 + x, y0 + y) for x, y in body], fill=(255, 255, 255, 255))
+        d.rectangle([x0 + 4, y0 + 7, x0 + 44, y0 + 8], fill=(212, 218, 234, 255))    # lower body shading
+        d.polygon([(x0 + 18, y0 + 2), (x0 + 26, y0 + 2), (x0 + 31, y0 + 5), (x0 + 20, y0 + 5)], fill=(34, 44, 86, 255))
+        d.line([(x0 + 19, y0 + 2), (x0 + 25, y0 + 2)], fill=(130, 180, 235, 255))
+        d.rectangle([x0 + 12, y0 + 5, x0 + 16, y0 + 6], fill=(46, 52, 88, 255))      # side air intake
+        d.line([(x0 + 24, y0 + 5), (x0 + 24, y0 + 7)], fill=(190, 196, 214, 255))      # door shut line
+        d.rectangle([x0 + 44, y0 + 6, x0 + 45, y0 + 6], fill=(255, 238, 140, 255))   # headlight
+        d.rectangle([x0 + 2, y0 + 5, x0 + 2, y0 + 6], fill=RED + (255,))              # tail light
+        d.rectangle([x0 + 1, y0 + 0, x0 + 7, y0 + 0], fill=(255, 255, 255, 255))      # rear wing
+        d.rectangle([x0 + 1, y0 + 1, x0 + 7, y0 + 1], fill=(190, 196, 214, 255))
+        d.rectangle([x0 + 3, y0 + 2, x0 + 3, y0 + 3], fill=(190, 196, 214, 255))
+        for wx in (11, 37):
+            d.ellipse([x0 + wx - 4, y0 + 5, x0 + wx + 4, y0 + 13], fill=(46, 52, 88, 255))   # wheel arch
+            d.ellipse([x0 + wx - 3, y0 + 6, x0 + wx + 3, y0 + 12], fill=(24, 24, 36, 255))   # tyre
+            d.ellipse([x0 + wx - 1, y0 + 8, x0 + wx + 1, y0 + 10], fill=(196, 198, 212, 255))  # rim
+        for k, (dy, ln) in enumerate(((3, 18), (5, 24), (7, 16), (9, 20))):
+            d.line([(x0 - 3 - ln, y0 + dy), (x0 - 3, y0 + dy)], fill=(255, 255, 255, 170))   # speed lines
+    countach(112, 68)
     # confetti / memphis bits
     d.polygon([(74, 44), (80, 44), (77, 39)], fill=(255, 120, 170, 255))
-    d.line([(196, 46), (200, 43), (204, 46), (208, 43)], fill=(60, 180, 200, 255))
-    d.rectangle([236, 56, 239, 59], outline=(255, 120, 170, 255))
     for (cx, cy, rr) in ((52, 10, 3), (226, 8, 2), (102, 44, 2), (276, 40, 2)):
         sparkle(px, cx, cy, rr, (255, 255, 255))
     # wordmark: plain brand-blue letters with one soft pink drop shadow (no bevel, no outline, single colour)
