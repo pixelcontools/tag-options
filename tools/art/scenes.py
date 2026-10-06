@@ -286,38 +286,13 @@ def sky():
 
 
 def heartsob(px, x0, y0):
-    """15x15 pixel 'heart sob': a heart-shaped yellow face, squinting brown eyes, open mouth, two wide streaming tears."""
-    HEART = ["..1111...1111..", ".111111.111111.", "111111111111111", "111111111111111", "111111111111111",
-             "111111111111111", ".1111111111111.", ".1111111111111.", "..11111111111..", "...111111111...",
-             "....1111111....", ".....11111.....", "......111......", ".......1......."]
-    S = 15
-    mask = [[(x < len(HEART[y]) and HEART[y][x] == '1') if y < len(HEART) else False for x in range(S)] for y in range(S)]
-    OUT, YEL, HI, EYE = (150, 100, 8), (255, 214, 40), (255, 244, 160), (118, 78, 10)
-    pts = {}
-    for y in range(S):
-        for x in range(S):
-            if mask[y][x]:
-                edge = any(not (0 <= x + dx < S and 0 <= y + dy < S and mask[y + dy][x + dx]) for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
-                pts[(x, y)] = OUT if edge else YEL
-    for (x, y) in ((2, 1), (3, 1), (2, 2), (10, 1), (11, 1), (11, 2)):                  # glossy highlight on each lobe
-        if pts.get((x, y)) == YEL:
-            pts[(x, y)] = HI
-    for ex in (2, 9):                                                                    # squinting eyes: two bars each
-        for x in range(ex, ex + 4):
-            pts[(x, 4)] = EYE; pts[(x, 6)] = EYE
-    pts[(6, 3)] = EYE; pts[(8, 3)] = EYE                                                 # brow dots
-    for x in range(5, 10): pts[(x, 8)] = EYE                                             # open mouth
-    pts[(5, 9)] = EYE; pts[(9, 9)] = EYE; pts[(5, 10)] = EYE; pts[(9, 10)] = EYE
-    for x in (6, 7, 8):
-        pts[(x, 9)] = (255, 255, 255); pts[(x, 10)] = (244, 112, 28); pts[(x, 11)] = EYE
-    for tx in (2, 10):                                                                   # tears fall past the heart edges
-        for y in range(7, 15):
-            col = (96, 236, 255) if y < 9 else (52, 160, 240) if y < 12 else (30, 84, 196)
-            for x in range(tx, tx + 3):
-                pts[(x, y)] = col
-    for (x, y), col in pts.items():
-        if 0 <= x0 + x < W and 0 <= y0 + y < H:
-            px[x0 + x, y0 + y] = col + (255,)
+    """Heart-shaped sob emoji (20x19 px pixel art, read from heartsob.png next to this file)."""
+    spr = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'heartsob.png')).convert('RGBA')
+    for j in range(spr.height):
+        for i in range(spr.width):
+            c = spr.getpixel((i, j))
+            if c[3] and 0 <= x0 + i < W and 0 <= y0 + j < H:
+                px[x0 + i, y0 + j] = c
 
 
 # ------------------------------------------------------------------ 5. city pop (80s Japan)
@@ -385,11 +360,11 @@ def citypop():
         d.rectangle([dx, 76, dx + 7, 76], fill=(255, 226, 120, 255))             # dashed centre line
     d.line([0, H - 3, W, H - 3], fill=(240, 244, 255, 255))
     # roadside sign: crying emoji + arrow pointing the way the car is heading (right)
-    d.rectangle([206, 58, 207, hz + 1], fill=(110, 114, 146, 255))
-    d.rounded_rectangle([186, 38, 228, 58], radius=2, fill=(255, 255, 255, 255), outline=BLUE + (255,))
-    heartsob(px, 189, 41)
-    d.rectangle([207, 47, 217, 49], fill=BLUE + (255,))
-    d.polygon([(216, 43), (216, 53), (225, 48)], fill=BLUE + (255,))
+    d.rounded_rectangle([176, 38, 224, 61], radius=2, fill=(255, 255, 255, 255), outline=BLUE + (255,))
+    d.rectangle([184, 62, 185, hz + 3], fill=(110, 114, 146, 255)); d.rectangle([214, 62, 215, hz + 3], fill=(110, 114, 146, 255))
+    heartsob(px, 180, 40)
+    d.rectangle([203, 48, 212, 50], fill=BLUE + (255,))
+    d.polygon([(211, 44), (211, 54), (220, 49)], fill=BLUE + (255,))
     # white Lamborghini Countach (side view, facing right)
     def countach(x0, y0):
         d.ellipse([x0 + 3, y0 + 10, x0 + 43, y0 + 13], fill=(40, 42, 70, 255))       # ground shadow
