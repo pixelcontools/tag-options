@@ -349,8 +349,8 @@ def citypop():
     d.rectangle([236, 56, 239, 59], outline=(255, 120, 170, 255))
     for (cx, cy, rr) in ((52, 10, 3), (226, 8, 2), (102, 44, 2), (276, 40, 2)):
         sparkle(px, cx, cy, rr, (255, 255, 255))
-    # wordmark: plain white letters with one soft pink drop shadow (no bevel, no outline, single colour)
-    wordmark(im, y0=14, colors={c: (255, 255, 255) for c in 'PIXELCONS'}, bevel=0, outline=None,
+    # wordmark: plain brand-blue letters with one soft pink drop shadow (no bevel, no outline, single colour)
+    wordmark(im, y0=14, colors={c: BLUE for c in 'PIXELCONS'}, bevel=0, outline=None,
              shadow=(236, 84, 140, 255))
     # vertical katakana, MS Gothic bitmap glyphs (authentic 80s pixel-Japanese look)
     f = ImageFont.truetype('C:/Windows/Fonts/msgothic.ttc', 12)
