@@ -21,7 +21,7 @@ def js(value):
 
 
 manifest = json.loads(read(os.path.join(TAGS_DIR, 'manifest.json')))
-tags = [{'label': f"{m['n']}. {m['name']}" if m['n'] else m['name'], 'desc': m['desc'],
+tags = [{'n': m['n'], 'label': f"{m['n']}. {m['name']}" if m['n'] else m['name'], 'desc': m['desc'],
          'html': read(os.path.join(TAGS_DIR, 'plain', m['file']))} for m in manifest]
 page = (read(os.path.join(ROOT, 'tools', 'index.template.html'))
         .replace('@@TAGS@@', js(tags))
