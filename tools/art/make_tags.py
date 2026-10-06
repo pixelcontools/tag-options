@@ -7,9 +7,9 @@ import base64, json, os, random, sys
 P = 'maplibregl-user-location-dot-pulse'
 GOLD, BLUE = '#ffca3a', '#1982c4'
 YEL, BLU = '\U0001f49b', '\U0001f499'
-PAD_Y, PAD_X = 12, 26                   # wrapper padding that leaves room for hearts outside the banner
+PAD_Y, PAD_X = 0, 26                    # side padding leaves room for the two hearts beside the banner
 BW, BH = 280, 84
-LEVELS = {'none': 0, 'few': 6, 'many': 16}
+LEVELS = {'none': 0, 'pair': 2}
 
 SCENES = [
     # file, number, name, description, lettering band (banner y0, y1)
@@ -27,28 +27,13 @@ def heart(emo, col, size, dur, delay, pos):
 
 
 def hearts(count, band, seed):
-    """big pair first, then floating hearts that avoid the lettering band (banner coordinates, offset by the wrapper padding)."""
+    """none -> nothing; pair -> one yellow heart left and one blue heart right of the banner, centred vertically.
+    They sit behind the banner (z-index 0 vs 1) so their pulse never covers the artwork."""
     if count == 0:
         return ''
-    r = random.Random(seed)
-    ly0, ly1 = band
-    out = [heart(YEL, GOLD, 24, 2.0, -2.0, f'left: 2px; top: {PAD_Y + (ly0 + ly1) // 2 - 12}px'),
-           heart(BLU, BLUE, 24, 2.0, -1.0, f'right: 2px; top: {PAD_Y + (ly0 + ly1) // 2 - 16}px')]
-    n_float = count - 2
-    # x slots spread across the banner; alternate above / below the lettering
-    xs = [(i + 0.5) / n_float for i in range(n_float)]
-    r.shuffle(xs)
-    for i, x in enumerate(xs):
-        emo, col = (YEL, GOLD) if i % 2 == 0 else (BLU, BLUE)
-        size = r.choice([8, 9, 10, 11, 12, 13])
-        above = (i % 2 == 0) and ly0 > 24
-        if above:
-            lo, hi = 3, max(4, ly0 - 5 - size)
-        else:
-            lo, hi = ly1 + 5, BH - size - 3
-        y = PAD_Y + round(lo + r.random() * max(0, hi - lo))
-        out.append(heart(emo, col, size, round(1.7 + r.random() * 1.1, 1), -round(r.random() * 2.4, 1), f'left: {PAD_X + round(x * (BW - 16))}px; top: {y}px'))
-    return ''.join(out[:count])
+    mid = PAD_Y + BH // 2 - 12
+    return (heart(YEL, GOLD, 24, 2.0, -2.0, f'left: 2px; top: {mid}px; z-index: 0') +
+            heart(BLU, BLUE, 24, 2.0, -1.0, f'right: 2px; top: {mid}px; z-index: 0'))
 
 
 def sparkle(x, y, dur, dl):
@@ -58,7 +43,7 @@ def sparkle(x, y, dur, dl):
 
 def build(png_bytes, count, band, seed):
     img = ('<img src="data:image/png;base64,' + base64.b64encode(png_bytes).decode() +
-           f'" width="{BW}" height="{BH}" style="display: block; image-rendering: pixelated" alt="">')
+           f'" width="{BW}" height="{BH}" style="display: block; position: relative; z-index: 1; image-rendering: pixelated" alt="">')
     if count == 0:
         return ('<span style="position: relative; display: inline-block; width: 280px; height: 84px">' + img +
                 sparkle(90, 12, 2.6, -0.4) + sparkle(171, 70, 3.1, -1.7) + sparkle(246, 22, 2.8, -1.1) + '</span>')
@@ -77,6 +62,11 @@ def main(scenes_dir, root):
     for fname, n, name, desc, band in SCENES:
         png = open(os.path.join(scenes_dir, fname), 'rb').read()
         slug = name.lower().replace(' ', '_')
+        for stale in ('few', 'many'):
+            for sub in ('plain', 'with-roll'):
+                p = os.path.join(tags, sub, f'{n:02d}_{slug}_hearts_{stale}.html')
+                if os.path.exists(p):
+                    os.remove(p)
         files = {}
         for lvl, count in LEVELS.items():
             html = build(png, count, band, n * 31)

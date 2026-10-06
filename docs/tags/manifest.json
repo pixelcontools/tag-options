@@ -149,8 +149,7 @@
   "desc": "The skyline after dark: crescent moon, shooting star, glowing wordmark and lit windows.",
   "levels": {
    "none": "24_pixel_night_hearts_none.html",
-   "few": "24_pixel_night_hearts_few.html",
-   "many": "24_pixel_night_hearts_many.html"
+   "pair": "24_pixel_night_hearts_pair.html"
   }
  },
  {
@@ -159,8 +158,7 @@
   "desc": "Retro synthwave: striped sun, neon grid floor, scanlines and a pink-glow wordmark.",
   "levels": {
    "none": "25_pixel_arcade_hearts_none.html",
-   "few": "25_pixel_arcade_hearts_few.html",
-   "many": "25_pixel_arcade_hearts_many.html"
+   "pair": "25_pixel_arcade_hearts_pair.html"
   }
  },
  {
@@ -169,8 +167,7 @@
   "desc": "A starfield with nebula clouds, a ringed gold planet and a blue moon behind the wordmark.",
   "levels": {
    "none": "26_pixel_space_hearts_none.html",
-   "few": "26_pixel_space_hearts_few.html",
-   "many": "26_pixel_space_hearts_many.html"
+   "pair": "26_pixel_space_hearts_pair.html"
   }
  },
  {
@@ -179,8 +176,7 @@
   "desc": "Retro Japan, 80s city pop: a white Countach cruises an elevated road above a pastel Tokyo skyline with street lights and a bus stop, toward a sign with a heart-shaped sobbing face and an arrow. Katakana (ピクセルコンズ) runs down the side.",
   "levels": {
    "none": "28_pixel_city_pop_hearts_none.html",
-   "few": "28_pixel_city_pop_hearts_few.html",
-   "many": "28_pixel_city_pop_hearts_many.html"
+   "pair": "28_pixel_city_pop_hearts_pair.html"
   }
  },
  {
@@ -189,8 +185,7 @@
   "desc": "Bright sky islands with trees, a little red-roofed house and drifting clouds.",
   "levels": {
    "none": "27_pixel_sky_hearts_none.html",
-   "few": "27_pixel_sky_hearts_few.html",
-   "many": "27_pixel_sky_hearts_many.html"
+   "pair": "27_pixel_sky_hearts_pair.html"
   }
  }
 ]
