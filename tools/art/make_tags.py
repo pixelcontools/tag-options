@@ -2,7 +2,7 @@
 
     python make_tags.py <scenes_dir> <repo_root>
 """
-import base64, json, os, random, sys
+import base64, json, os, random, re, sys
 
 P = 'maplibregl-user-location-dot-pulse'
 GOLD, BLUE = '#ffca3a', '#1982c4'
@@ -17,6 +17,7 @@ SCENES = [
     ('arcade.png', 25, 'Pixel Arcade', 'Retro synthwave: striped sun, neon grid floor, scanlines and a pink-glow wordmark.', (13, 38)),
     ('space.png', 26, 'Pixel Space', 'A starfield with nebula clouds, a ringed gold planet and a blue moon behind the wordmark.', (27, 52)),
     ('citypop.png', 28, 'Pixel City Pop', 'Retro Japan, 80s city pop: a white Countach cruises an elevated road above a pastel Tokyo skyline with street lights and a bus stop, toward a sign with a heart-shaped sobbing face and an arrow. Katakana (ピクセルコンズ) runs down the side.', (12, 37)),
+    ('citypop2.png', 29, 'Pixel City Pop: Gold to Blue', 'City Pop again, but the whole scene follows the guild gradient: golden hour on the left cooling to blue on the right, down to the skyline, road tint and lamp glow.', (12, 37)),
     ('sky.png', 27, 'Pixel Sky', 'Bright sky islands with trees, a little red-roofed house and drifting clouds.', (25, 50)),
 ]
 
@@ -28,12 +29,12 @@ def heart(emo, col, size, dur, delay, pos):
 
 def hearts(count, band, seed):
     """none -> nothing; pair -> one yellow heart left and one blue heart right of the banner, centred vertically.
-    They sit behind the banner (z-index 0 vs 1) so their pulse never covers the artwork."""
+    They render on top of the banner (z-index 2 vs 1)."""
     if count == 0:
         return ''
     mid = PAD_Y + BH // 2 - 12
-    return (heart(YEL, GOLD, 24, 2.0, -2.0, f'left: 2px; top: {mid}px; z-index: 0') +
-            heart(BLU, BLUE, 24, 2.0, -1.0, f'right: 2px; top: {mid}px; z-index: 0'))
+    return (heart(YEL, GOLD, 24, 2.0, -2.0, f'left: 2px; top: {mid}px; z-index: 2') +
+            heart(BLU, BLUE, 24, 2.0, -1.0, f'right: 2px; top: {mid}px; z-index: 2'))
 
 
 def sparkle(x, y, dur, dl):
@@ -61,7 +62,7 @@ def main(scenes_dir, root):
     man = [m for m in man if m['n'] not in {s[1] for s in SCENES}]
     for fname, n, name, desc, band in SCENES:
         png = open(os.path.join(scenes_dir, fname), 'rb').read()
-        slug = name.lower().replace(' ', '_')
+        slug = re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')      # no colons etc. in file names
         for stale in ('few', 'many'):
             for sub in ('plain', 'with-roll'):
                 p = os.path.join(tags, sub, f'{n:02d}_{slug}_hearts_{stale}.html')

@@ -301,16 +301,30 @@ def heartsob(px, x0, y0, scale=2):
 
 
 # ------------------------------------------------------------------ 5. city pop (80s Japan)
-def citypop():
+def citypop(grad=False):
+    """grad=False: pastel sunset version. grad=True: the brand gradient, golden hour on the left cooling to blue on the right."""
     from PIL import ImageFont
-    im = gradient([(0, (58, 168, 232)), (0.38, (140, 214, 242)), (0.62, (255, 205, 215)), (0.8, (255, 214, 160)), (1, (255, 228, 190))], 11, 0.0, 1.0)
+    GRAD = [(0, (255, 206, 86)), (0.26, (255, 232, 150)), (0.5, (204, 236, 250)), (0.76, (106, 182, 232)), (1, (34, 128, 200))]
+    warm_cool = lambda x, a, b: lerp(a, b, max(0, min(1, x / W)))
+    im = gradient(GRAD, 13, 1.0, 0.2) if grad else gradient([(0, (58, 168, 232)), (0.38, (140, 214, 242)), (0.62, (255, 205, 215)), (0.8, (255, 214, 160)), (1, (255, 228, 190))], 11, 0.0, 1.0)
     d, px = ImageDraw.Draw(im), im.load()
     hz = 62
     # pastel sun
-    sx, sy = 140, hz + 4
-    d.ellipse([sx - 37, sy - 37, sx + 37, sy + 37], fill=(255, 196, 206, 255))
-    d.ellipse([sx - 31, sy - 31, sx + 31, sy + 31], fill=(255, 150, 175, 255))
-    d.ellipse([sx - 22, sy - 26, sx + 6, sy - 6], fill=(255, 205, 210, 255))
+    if grad:
+        sx, sy = 52, hz + 6                                           # big golden sun low on the left
+        for k in range(20):
+            a_ = k * math.pi / 10
+            for rr in range(40, 49 if k % 2 == 0 else 45):
+                x_, y_ = round(sx + math.cos(a_) * rr), round(sy + math.sin(a_) * rr)
+                d.rectangle([x_ - 1, y_ - 1, x_, y_], fill=(255, 214, 90, 255))
+        d.ellipse([sx - 38, sy - 38, sx + 38, sy + 38], fill=(255, 190, 40, 255))
+        d.ellipse([sx - 33, sy - 33, sx + 33, sy + 33], fill=(255, 214, 70, 255))
+        d.ellipse([sx - 24, sy - 27, sx + 6, sy - 7], fill=(255, 238, 150, 255))
+    else:
+        sx, sy = 140, hz + 4
+        d.ellipse([sx - 37, sy - 37, sx + 37, sy + 37], fill=(255, 196, 206, 255))
+        d.ellipse([sx - 31, sy - 31, sx + 31, sy + 31], fill=(255, 150, 175, 255))
+        d.ellipse([sx - 22, sy - 26, sx + 6, sy - 6], fill=(255, 205, 210, 255))
     # clouds (flat pastel streaks)
     for (cx, cy, w) in ((60, 8, 22), (214, 6, 18), (262, 30, 14), (28, 44, 16)):
         d.rounded_rectangle([cx - w, cy, cx + w, cy + 3], radius=2, fill=(255, 255, 255, 235))
@@ -320,8 +334,9 @@ def citypop():
     x = -3
     while x < W:
         bw = r.randint(9, 16); bh = r.randint(7, 17)
-        d.rectangle([x, hz - bh, x + bw - 1, hz], fill=(138, 150, 208, 255))
-        d.rectangle([x, hz - bh, x + bw - 1, hz - bh], fill=(176, 186, 232, 255))
+        bcol = warm_cool(x + bw // 2, (214, 150, 148), (84, 128, 200)) if grad else (138, 150, 208)
+        d.rectangle([x, hz - bh, x + bw - 1, hz], fill=bcol + (255,))
+        d.rectangle([x, hz - bh, x + bw - 1, hz - bh], fill=lerp(bcol, (255, 255, 255), 0.35) + (255,))
         for wy in range(hz - bh + 3, hz - 2, 4):
             for wx in range(x + 2, x + bw - 2, 4):
                 if r.random() < 0.25:
@@ -333,11 +348,12 @@ def citypop():
         gl = Image.new('L', (W, H), 0); gd = ImageDraw.Draw(gl)
         gd.ellipse([x + 4 - 9, top + 3 - 8, x + 4 + 9, top + 3 + 8], fill=50)
         gd.ellipse([x + 4 - 5, top + 3 - 5, x + 4 + 5, top + 3 + 5], fill=70)
-        im.paste(Image.new('RGBA', (W, H), (255, 236, 170, 255)), (0, 0), gl)
+        glow_col = warm_cool(x, (255, 220, 120), (170, 218, 255)) if grad else (255, 236, 170)
+        im.paste(Image.new('RGBA', (W, H), glow_col + (255,)), (0, 0), gl)
         d.rectangle([x, top, x + 1, base], fill=(92, 98, 140, 255))                  # pole
         d.rectangle([x, top, x + 5, top], fill=(92, 98, 140, 255))                   # arm
         d.rectangle([x + 3, top + 1, x + 6, top + 1], fill=(70, 74, 110, 255))      # lamp housing
-        d.rectangle([x + 3, top + 2, x + 6, top + 2], fill=(255, 244, 190, 255))    # lit lamp
+        d.rectangle([x + 3, top + 2, x + 6, top + 2], fill=lerp(glow_col, (255, 255, 255), 0.55) + (255,))    # lit lamp
     for lx in (30, 66, 104, 142, 228):
         streetlight(lx)
     # bus stop: glass shelter with a bench and a poster, plus a round bus sign on a pole
@@ -359,6 +375,14 @@ def citypop():
     d.rectangle([0, hz + 2, W, H], fill=(74, 78, 116, 255))
     for k in range(hz + 2, H, 4):
         d.line([0, k, W, k], fill=(82, 86, 126, 255))
+    if grad:                                                                    # warm light on the left of the road, cool on the right
+        tint = Image.new('RGBA', (W, H), (0, 0, 0, 0)); tp = tint.load()
+        for xx in range(W):
+            col = warm_cool(xx, (255, 190, 80), (40, 140, 230))
+            for yy in range(hz + 2, H):
+                tp[xx, yy] = col + (84,)
+        im.alpha_composite(tint)
+        d = ImageDraw.Draw(im)
     d.rectangle([0, hz + 1, W, hz + 2], fill=(226, 230, 244, 255))             # rail top
     d.line([0, hz + 3, W, hz + 3], fill=(150, 156, 190, 255))                   # rail shadow on the road
     for px_ in range(2, W, 9):
@@ -400,22 +424,26 @@ def citypop():
     for (cx, cy, rr) in ((52, 10, 3), (226, 8, 2), (102, 44, 2), (276, 40, 2)):
         sparkle(px, cx, cy, rr, (255, 255, 255))
     # wordmark: brand-blue PI / CONS, red-pink XEL, one flat white drop shadow (no bevel, no outline)
-    wordmark(im, y0=14, colors={c: ((255, 62, 112) if c in 'XEL' else BLUE) for c in 'PIXELCONS'}, bevel=0, outline=None,
-             shadow=(255, 255, 255, 255))
+    if grad:       # outlined so the blue letters stay readable over the blue half of the sky
+        wordmark(im, y0=14, colors={c: ((255, 62, 112) if c in 'XEL' else BLUE) for c in 'PIXELCONS'}, bevel=0,
+                 outline=(255, 255, 255), shadow=(28, 78, 140, 210))
+    else:
+        wordmark(im, y0=14, colors={c: ((255, 62, 112) if c in 'XEL' else BLUE) for c in 'PIXELCONS'}, bevel=0, outline=None,
+                 shadow=(255, 255, 255, 255))
     # vertical katakana, MS Gothic bitmap glyphs (authentic 80s pixel-Japanese look)
     f = ImageFont.truetype('C:/Windows/Fonts/msgothic.ttc', 12)
     km = Image.new('L', (W, H), 0); kd = ImageDraw.Draw(km); kd.fontmode = '1'
     for i, ch in enumerate('ピクセルコンズ'):
         kd.text((8, 2 + i * 11), ch, font=f, fill=255)
     ksh = Image.new('L', (W, H), 0); ksh.paste(km, (1, 1))
-    im.paste(Image.new('RGBA', (W, H), (190, 60, 120, 255)), (0, 0), ksh)
-    im.paste(Image.new('RGBA', (W, H), (255, 255, 255, 255)), (0, 0), km)
+    im.paste(Image.new('RGBA', (W, H), ((255, 246, 205, 255) if grad else (190, 60, 120, 255))), (0, 0), ksh)
+    im.paste(Image.new('RGBA', (W, H), ((168, 72, 22, 255) if grad else (255, 255, 255, 255))), (0, 0), km)
     return finish(im, edge=(255, 255, 255, 240))
 
 
 if __name__ == '__main__':
     out = sys.argv[1] if len(sys.argv) > 1 else '.'
     os.makedirs(out, exist_ok=True)
-    for name, fn in (('night', night), ('arcade', arcade), ('space', space), ('sky', sky), ('citypop', citypop)):
+    for name, fn in (('night', night), ('arcade', arcade), ('space', space), ('sky', sky), ('citypop', citypop), ('citypop2', lambda: citypop(True))):
         im = fn(); p = os.path.join(out, name + '.png'); im.save(p, optimize=True)
         print(name, os.path.getsize(p), 'bytes')

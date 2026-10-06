@@ -180,6 +180,15 @@
   }
  },
  {
+  "n": 29,
+  "name": "Pixel City Pop: Gold to Blue",
+  "desc": "City Pop again, but the whole scene follows the guild gradient: golden hour on the left cooling to blue on the right, down to the skyline, road tint and lamp glow.",
+  "levels": {
+   "none": "29_pixel_city_pop_gold_to_blue_hearts_none.html",
+   "pair": "29_pixel_city_pop_gold_to_blue_hearts_pair.html"
+  }
+ },
+ {
   "n": 27,
   "name": "Pixel Sky",
   "desc": "Bright sky islands with trees, a little red-roofed house and drifting clouds.",
