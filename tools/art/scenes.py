@@ -285,14 +285,19 @@ def sky():
 
 
 
-def heartsob(px, x0, y0):
-    """Heart-shaped sob emoji (20x19 px pixel art, read from heartsob.png next to this file)."""
+def heartsob(px, x0, y0, scale=2):
+    """Heart-shaped sob emoji: an 8x8 pixel sprite (heartsob.png next to this file), each pixel drawn scale x scale."""
     spr = Image.open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'heartsob.png')).convert('RGBA')
     for j in range(spr.height):
         for i in range(spr.width):
             c = spr.getpixel((i, j))
-            if c[3] and 0 <= x0 + i < W and 0 <= y0 + j < H:
-                px[x0 + i, y0 + j] = c
+            if not c[3]:
+                continue
+            for dy in range(scale):
+                for dx in range(scale):
+                    X, Y = x0 + i * scale + dx, y0 + j * scale + dy
+                    if 0 <= X < W and 0 <= Y < H:
+                        px[X, Y] = c
 
 
 # ------------------------------------------------------------------ 5. city pop (80s Japan)
@@ -360,11 +365,11 @@ def citypop():
         d.rectangle([dx, 76, dx + 7, 76], fill=(255, 226, 120, 255))             # dashed centre line
     d.line([0, H - 3, W, H - 3], fill=(240, 244, 255, 255))
     # roadside sign: crying emoji + arrow pointing the way the car is heading (right)
-    d.rounded_rectangle([176, 38, 224, 61], radius=2, fill=(255, 255, 255, 255), outline=BLUE + (255,))
-    d.rectangle([184, 62, 185, hz + 3], fill=(110, 114, 146, 255)); d.rectangle([214, 62, 215, hz + 3], fill=(110, 114, 146, 255))
-    heartsob(px, 180, 40)
-    d.rectangle([203, 48, 212, 50], fill=BLUE + (255,))
-    d.polygon([(211, 44), (211, 54), (220, 49)], fill=BLUE + (255,))
+    d.rounded_rectangle([178, 40, 222, 59], radius=2, fill=(255, 255, 255, 255), outline=BLUE + (255,))
+    d.rectangle([186, 60, 187, hz + 3], fill=(110, 114, 146, 255)); d.rectangle([213, 60, 214, hz + 3], fill=(110, 114, 146, 255))
+    heartsob(px, 183, 42)
+    d.rectangle([202, 48, 210, 50], fill=BLUE + (255,))
+    d.polygon([(209, 44), (209, 54), (218, 49)], fill=BLUE + (255,))
     # white Lamborghini Countach (side view, facing right)
     def countach(x0, y0):
         d.ellipse([x0 + 3, y0 + 10, x0 + 43, y0 + 13], fill=(40, 42, 70, 255))       # ground shadow
