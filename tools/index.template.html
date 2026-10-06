@@ -64,6 +64,7 @@ footer a{color:inherit}
 </header>
 <div id="bar">
   <div class="grp"><label class="sw"><input type="checkbox" id="rollToggle" checked> Include Roll image</label></div>
+  <div class="grp"><label class="sw" title="Turns the extra floating hearts on or off for the scene tags (24-28)"><input type="checkbox" id="heartsToggle" checked> Extra hearts</label></div>
   <div class="grp"><label class="sw" title="When ticked, only the tag under your cursor (or open in the popup) animates"><input type="checkbox" id="hlToggle"> Animate highlighted</label></div>
   <div class="grp"><span>Background:</span>
     <button data-bg="" class="on">dark</button><button data-bg="light">#EBEDEF</button><button data-bg="white">white</button></div>
@@ -76,7 +77,7 @@ footer a{color:inherit}
   <div class="hd"><div><b id="mtitle"></b><span id="mdesc"></span></div><button id="x" aria-label="Close">&times;</button></div>
   <div id="big"></div>
   <div id="mrow"><label class="sw"><input type="checkbox" id="mroll"> Include Roll image</label>
-    <label class="sw" id="mhwrap">Hearts <select id="mhearts"></select></label></div>
+    <span id="mhwrap" style="display:flex;align-items:center;gap:8px"><label class="sw"><input type="checkbox" id="mhon"> Extra hearts</label> <select id="mhearts"></select></span></div>
   <textarea id="code" readonly spellcheck="false"></textarea>
   <div id="mfoot"><button id="copy">Copy HTML</button><button id="dl">Download .html</button><span id="mcount"></span></div>
 </div></div>
@@ -87,7 +88,9 @@ const ROLL = @@ROLL@@;
 const withRoll = h => '<div style="display: inline-flex; align-items: center">' + h +
   '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + ROLL + '</span></div>';
 const LEVEL_LABEL = { none: 'no hearts', few: 'few hearts', many: 'many hearts' };
-const tagHtml = t => t.levels ? t.levels[t.lvl || 'few'] : t.html;
+let hearts = true;                       // global switch: off shows every scene tag without its extra hearts
+const effLevel = t => hearts ? (t.lvl || 'few') : 'none';
+const tagHtml = t => t.levels ? t.levels[effLevel(t)] : t.html;
 const html = (t, roll) => roll ? withRoll(tagHtml(t)) : tagHtml(t);
 const levelSelect = cls => '<select class="' + cls + '" title="How many hearts float around the tag">' +
   Object.keys(LEVEL_LABEL).map(k => '<option value="' + k + '">' + '♥ ' + LEVEL_LABEL[k] + '</option>').join('') + '</select>';
@@ -131,12 +134,12 @@ function renderGrid() {
     // quick actions on the card itself; they always use the real (box-shadow) HTML, never the grid's bitmap preview
     const hs = c.querySelector('.hs');
     if (hs) {
-      hs.value = t.lvl || 'few';
+      hs.value = effLevel(t); hs.disabled = !hearts;
       hs.onclick = e => e.stopPropagation();
       hs.onchange = e => {
         t.lvl = hs.value; mount(stage, html(t, roll));
         if (hl) setSvgPaused(stage, !c.matches(':hover'), c._rest);
-        if (current === t && $('#modal').classList.contains('open')) { $('#mhearts').value = t.lvl; refreshModal(); }
+        if (current === t && $('#modal').classList.contains('open')) { $('#mhearts').value = effLevel(t); refreshModal(); }
       };
     }
     c.querySelector('.cc').onclick = e => { e.stopPropagation(); copyText(html(t, roll), e.target); };
@@ -148,7 +151,7 @@ function openModal(t) {
   current = t; mroll.checked = roll;
   $('#mhwrap').style.display = t.levels ? '' : 'none';
   $('#mhearts').innerHTML = Object.keys(LEVEL_LABEL).map(k => '<option value="' + k + '">' + LEVEL_LABEL[k] + '</option>').join('');
-  $('#mhearts').value = t.lvl || 'few';
+  $('#mhearts').value = effLevel(t); $('#mhearts').disabled = !hearts; $('#mhon').checked = hearts;
   $('#mtitle').textContent = t.label; $('#mdesc').textContent = t.desc;
   $('#modal').classList.add('open'); refreshModal();
 }
@@ -170,6 +173,16 @@ function setRoll(v) {
 }
 mroll.onchange = () => setRoll(mroll.checked);
 $('#mhearts').onchange = e => { current.lvl = e.target.value; renderGrid(); refreshModal(); };
+// One shared hearts switch, mirrored in the top bar and the popup (same idea as the Roll toggle).
+function setHearts(v) {
+  hearts = v; $('#heartsToggle').checked = v; $('#mhon').checked = v;
+  renderGrid();
+  if (current && $('#modal').classList.contains('open')) {
+    $('#mhearts').value = effLevel(current); $('#mhearts').disabled = !v; refreshModal();
+  }
+}
+$('#heartsToggle').onchange = e => setHearts(e.target.checked);
+$('#mhon').onchange = e => setHearts(e.target.checked);
 rollToggle.onchange = () => setRoll(rollToggle.checked);
 $('#hlToggle').onchange = e => { hl = e.target.checked; applyHighlightMode(); };
 async function copyText(text, btn) {
@@ -183,7 +196,7 @@ async function copyText(text, btn) {
 }
 function fileName(t, withRollFlag) {
   const name = t.label.replace(/^\d+\.\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-  return String(t.n).padStart(2, '0') + '_' + name + (t.levels ? '_hearts_' + (t.lvl || 'few') : '') + (withRollFlag ? '_with_roll' : '') + '.html';
+  return String(t.n).padStart(2, '0') + '_' + name + (t.levels ? '_hearts_' + effLevel(t) : '') + (withRollFlag ? '_with_roll' : '') + '.html';
 }
 function downloadHtml(t, withRollFlag) {
   const blob = new Blob([html(t, withRollFlag)], { type: 'text/html;charset=utf-8' });
