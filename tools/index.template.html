@@ -24,13 +24,16 @@ button{font:inherit;color:inherit;background:transparent;border:1px solid var(--
 button.on{background:#5865f2;border-color:#5865f2;color:#fff}
 label.sw{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
 #grid{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:16px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .12s,border-color .12s}
 .card:hover{transform:translateY(-2px);border-color:#5865f2}
 /* "Animate highlighted": idle cards are frozen; hovering a card (or opening it) lets it play */
 body.hl-only .card:not(:hover) .stage *{animation-play-state:paused!important}
 .stage{height:150px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
 .stage>.fit{transform-origin:center;flex:none}
 .lab{padding:9px 12px;border-top:1px solid var(--line);font-size:13px;display:flex;flex-direction:column;gap:2px}
+.lab{padding-right:92px}
+.acts{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:4px}
+.acts button{font-size:11px;padding:2px 8px;white-space:nowrap}
 .lab b{font-size:14px}.lab span{color:var(--muted);font-size:12px;line-height:1.4}
 footer{max-width:1300px;margin:0 auto;padding:8px 16px 40px;color:var(--muted);font-size:12px}
 footer a{color:inherit}
@@ -47,6 +50,7 @@ footer a{color:inherit}
 #code{margin:8px 16px;width:calc(100% - 32px);height:140px;resize:vertical;font:12px/1.4 ui-monospace,Consolas,monospace;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px}
 #mfoot{padding:0 16px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
 #copy{background:#5865f2;border-color:#5865f2;color:#fff;font-weight:500;padding:6px 16px}
+#dl{padding:6px 14px}
 </style>
 </head>
 <body>
@@ -70,7 +74,7 @@ footer a{color:inherit}
   <div id="big"></div>
   <div id="mrow"><label class="sw"><input type="checkbox" id="mroll"> Include Roll image</label></div>
   <textarea id="code" readonly spellcheck="false"></textarea>
-  <div id="mfoot"><button id="copy">Copy HTML</button><span id="mcount"></span></div>
+  <div id="mfoot"><button id="copy">Copy HTML</button><button id="dl">Download .html</button><span id="mcount"></span></div>
 </div></div>
 
 <script>
@@ -126,7 +130,8 @@ function renderGrid() {
   grid.innerHTML = '';
   TAGS.forEach(t => {
     const c = document.createElement('div'); c.className = 'card';
-    c.innerHTML = '<div class="stage"></div><div class="lab"><b>' + t.label + '</b><span></span></div>';
+    c.innerHTML = '<div class="stage"></div><div class="lab"><b>' + t.label + '</b><span></span></div>' +
+      '<div class="acts"><button class="cc">Copy HTML</button><button class="cd">Download</button></div>';
     c.querySelector('span').textContent = t.desc;
     grid.appendChild(c);
     const stage = c.querySelector('.stage'); c._rest = REST[t.n] || REST_DEFAULT;
@@ -134,6 +139,9 @@ function renderGrid() {
     c.onmouseenter = () => { if (hl) setSvgPaused(stage, false); };
     c.onmouseleave = () => { if (hl) setSvgPaused(stage, true, c._rest); };
     c.onclick = () => openModal(t);
+    // quick actions on the card itself; they always use the real (box-shadow) HTML, never the grid's bitmap preview
+    c.querySelector('.cc').onclick = e => { e.stopPropagation(); copyText(html(t, roll), e.target); };
+    c.querySelector('.cd').onclick = e => { e.stopPropagation(); downloadHtml(t, roll); };
   });
   applyHighlightMode();
 }
@@ -146,7 +154,7 @@ function refreshModal() {
   const h = html(current, mroll.checked);
   mount($('#big'), h, $('#big').clientWidth);
   $('#code').value = h; $('#mcount').textContent = h.length.toLocaleString() + ' characters';
-  $('#copy').textContent = 'Copy HTML';
+  $('#copy').textContent = 'Copy HTML'; $('#copy').dataset.label = '';
 }
 const close = () => $('#modal').classList.remove('open');
 $('#x').onclick = close;
@@ -161,12 +169,28 @@ function setRoll(v) {
 mroll.onchange = () => setRoll(mroll.checked);
 rollToggle.onchange = () => setRoll(rollToggle.checked);
 $('#hlToggle').onchange = e => { hl = e.target.checked; applyHighlightMode(); };
-$('#copy').onclick = async () => {
-  const v = $('#code').value, b = $('#copy');
-  try { await navigator.clipboard.writeText(v); }
-  catch (_) { const a = $('#code'); a.select(); document.execCommand('copy'); }
-  b.textContent = 'Copied!';
-};
+async function copyText(text, btn) {
+  try { await navigator.clipboard.writeText(text); }
+  catch (_) {
+    const a = document.createElement('textarea'); a.value = text; a.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove();
+  }
+  const old = btn.dataset.label || btn.textContent; btn.dataset.label = old;
+  btn.textContent = 'Copied!'; clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = old; }, 1400);
+}
+function fileName(t, withRollFlag) {
+  const name = t.label.replace(/^\d+\.\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  return String(t.n).padStart(2, '0') + '_' + name + (withRollFlag ? '_with_roll' : '') + '.html';
+}
+function downloadHtml(t, withRollFlag) {
+  const blob = new Blob([html(t, withRollFlag)], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = fileName(t, withRollFlag);
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+$('#copy').onclick = () => copyText($('#code').value, $('#copy'));
+$('#dl').onclick = () => downloadHtml(current, mroll.checked);
 document.querySelectorAll('[data-bg]').forEach(b => b.onclick = () => {
   document.body.className = b.dataset.bg;
   document.querySelectorAll('[data-bg]').forEach(x => x.classList.toggle('on', x === b));
