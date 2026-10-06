@@ -103,7 +103,7 @@ function mount(host, markup, maxW) {
 }
 let hl = false;
 // SMIL time (s) each tag freezes on: a moment when its letters are all visible and nothing is mid-effect
-const REST = {5: 2.0, 9: 1.0, 11: 2.5, 17: 1.5}, REST_DEFAULT = 3.9;
+const REST = {5: 2.0, 9: 1.0, 11: 2.5}, REST_DEFAULT = 3.9;
 function setSvgPaused(host, paused, rest) {
   host.querySelectorAll('svg').forEach(v => {
     try { if (paused) { v.setCurrentTime(rest); v.pauseAnimations(); } else v.unpauseAnimations(); } catch (_) {}

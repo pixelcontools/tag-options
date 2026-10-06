@@ -18,40 +18,16 @@
   "file": "02_sonar_ripple.html"
  },
  {
-  "n": 3,
-  "name": "Heartbeat",
-  "desc": "All hearts beat together in a lub-dub rhythm; text is still.",
-  "file": "03_heartbeat.html"
- },
- {
-  "n": 4,
-  "name": "Twinkle",
-  "desc": "Six little sparkles pop in and fade around the tag at different times.",
-  "file": "04_twinkle.html"
- },
- {
   "n": 5,
   "name": "Shimmer",
   "desc": "A bright highlight sweeps across the letters, then rests.",
   "file": "05_shimmer.html"
  },
  {
-  "n": 6,
-  "name": "Rainbow flow",
-  "desc": "Colours roll smoothly through the letters like a rainbow wave (loses the blue/red brand colours).",
-  "file": "06_rainbow_flow.html"
- },
- {
   "n": 7,
   "name": "Letter wave",
   "desc": "Letters hop up one after another in a quick wave, then pause.",
   "file": "07_letter_wave.html"
- },
- {
-  "n": 8,
-  "name": "Typewriter",
-  "desc": "Letters type in one by one, hold, then fade and loop.",
-  "file": "08_typewriter.html"
  },
  {
   "n": 9,
@@ -72,18 +48,6 @@
   "file": "11_gloss_streak.html"
  },
  {
-  "n": 12,
-  "name": "Gradient flow",
-  "desc": "The gold-to-blue background slowly scrolls sideways under the text.",
-  "file": "12_gradient_flow.html"
- },
- {
-  "n": 13,
-  "name": "Colour swap",
-  "desc": "Blue and red letters slowly trade places, a gentle ripple of the brand colours.",
-  "file": "13_colour_swap.html"
- },
- {
   "n": 14,
   "name": "Border chase",
   "desc": "A bright dash of light runs around the badge border, forever circling.",
@@ -102,28 +66,10 @@
   "file": "16_pop.html"
  },
  {
-  "n": 17,
-  "name": "Glitch",
-  "desc": "Calm most of the time, then a quick red/cyan glitch jolt every ~3 seconds.",
-  "file": "17_glitch.html"
- },
- {
-  "n": 18,
-  "name": "Float",
-  "desc": "The whole word gently floats up and down like it is on water.",
-  "file": "18_float.html"
- },
- {
   "n": 19,
   "name": "Marquee flash",
   "desc": "Each letter lights up white for an instant in turn, like theatre marquee bulbs.",
   "file": "19_marquee_flash.html"
- },
- {
-  "n": 20,
-  "name": "Heart orbit",
-  "desc": "Four small hearts glide around the badge edge in a loop.",
-  "file": "20_heart_orbit.html"
  },
  {
   "n": 21,
