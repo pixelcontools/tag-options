@@ -54,7 +54,7 @@ footer a{color:inherit}
   then paste it into your guild settings &rarr; <i>Tag</i> field.</p>
 </header>
 <div id="bar">
-  <div class="grp"><label class="sw"><input type="checkbox" id="rollToggle"> Include Roll image</label></div>
+  <div class="grp"><label class="sw"><input type="checkbox" id="rollToggle" checked> Include Roll image</label></div>
   <div class="grp"><span>Background:</span>
     <button data-bg="" class="on">dark</button><button data-bg="light">#EBEDEF</button><button data-bg="white">white</button></div>
 </div>
@@ -99,7 +99,7 @@ const previewHtml = (t, roll) => roll
 
 const $ = s => document.querySelector(s);
 const grid = $('#grid'), rollToggle = $('#rollToggle'), mroll = $('#mroll');
-let roll = false, current = null;
+let roll = true, current = null;
 
 function mount(host, markup, maxW) {
   host.innerHTML = '<div class="fit">' + markup + '</div>';
