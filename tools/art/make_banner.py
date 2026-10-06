@@ -101,9 +101,10 @@ def heart(x0, y0, col, hi):
                         px[X, Y] = (40, 30, 20, 255)
 
 
-heart(9, 28, (255, 214, 10), (255, 250, 190))
-heart(264, 36, (25, 130, 196), (150, 210, 245))
-heart(250, 12, (255, 214, 10), (255, 250, 190))
+if '--no-hearts' not in sys.argv:
+    heart(9, 28, (255, 214, 10), (255, 250, 190))
+    heart(264, 36, (25, 130, 196), (150, 210, 245))
+    heart(250, 12, (255, 214, 10), (255, 250, 190))
 
 # ---- chunky pixel wordmark: P I X E L C O N S, slanted, outlined, shadowed
 GLYPH = {
@@ -181,6 +182,6 @@ ImageDraw.Draw(edge).rounded_rectangle([0, 0, W - 1, H - 1], radius=RAD, outline
 im.paste(Image.new('RGBA', (W, H), (255, 255, 255, 235)), (0, 0), edge)
 alpha = im.getchannel('A'); im.putalpha(Image.composite(alpha, Image.new('L', (W, H), 0), rm))
 
-out = sys.argv[1] if len(sys.argv) > 1 else 'banner.png'
+out = next((a for a in sys.argv[1:] if not a.startswith('--')), 'banner.png')
 im.save(out, optimize=True)
 print(out, im.size)
