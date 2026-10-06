@@ -327,31 +327,34 @@ def citypop():
                 if r.random() < 0.25:
                     d.rectangle([wx, wy, wx + 1, wy + 1], fill=(255, 238, 190, 255))
         x += bw
-    tx = 244
-    for y in range(8, hz + 1):
-        if y < 14: half = 0
-        elif y < 38: half = 1 + (y - 14) / 24 * 3
-        else: half = 4 + (y - 38) / (hz - 38) * 7
-        col = (231, 29, 54) if (y // 4) % 2 == 0 else (255, 250, 245)
-        d.line([tx - round(half), y, tx + round(half), y], fill=col + (255,))
-    d.rectangle([tx - 6, 36, tx + 6, 38], fill=(255, 250, 245, 255)); d.rectangle([tx - 4, 22, tx + 4, 23], fill=(255, 250, 245, 255))
-    d.line([tx, 2, tx, 8], fill=(231, 29, 54, 255))
-    # palm trees, planted on the city side of the guardrail
-    def palm(bx, by, lean, h=34):
-        pts = []
-        for i in range(h):
-            pts.append((bx + round(lean * (i / h) ** 1.6 * h * 0.5), by - i))
-        for (x, y) in pts:
-            d.rectangle([x, y, x + 1, y], fill=(120, 74, 42, 255))
-        cx, cy = pts[-1]
-        for ang in (-170, -140, -110, -75, -45, -15, 15):
-            rad = math.radians(ang)
-            for t in range(0, 15):
-                fx = cx + math.cos(rad) * t
-                fy = cy + math.sin(rad) * t * 0.55 + (t * t) / 28
-                d.rectangle([round(fx), round(fy), round(fx) + 1, round(fy)], fill=((26, 120, 90) if t % 3 else (60, 170, 110)) + (255,))
-    palm(34, hz + 4, 0.35, 36)
-    palm(268, hz + 4, -0.3, 40)
+    # tiny street lights along the rail, with a soft warm glow
+    def streetlight(x, base=hz + 1, h=17):
+        top = base - h
+        gl = Image.new('L', (W, H), 0); gd = ImageDraw.Draw(gl)
+        gd.ellipse([x + 4 - 9, top + 3 - 8, x + 4 + 9, top + 3 + 8], fill=50)
+        gd.ellipse([x + 4 - 5, top + 3 - 5, x + 4 + 5, top + 3 + 5], fill=70)
+        im.paste(Image.new('RGBA', (W, H), (255, 236, 170, 255)), (0, 0), gl)
+        d.rectangle([x, top, x + 1, base], fill=(92, 98, 140, 255))                  # pole
+        d.rectangle([x, top, x + 5, top], fill=(92, 98, 140, 255))                   # arm
+        d.rectangle([x + 3, top + 1, x + 6, top + 1], fill=(70, 74, 110, 255))      # lamp housing
+        d.rectangle([x + 3, top + 2, x + 6, top + 2], fill=(255, 244, 190, 255))    # lit lamp
+    for lx in (30, 66, 104, 142, 228):
+        streetlight(lx)
+    # bus stop: glass shelter with a bench and a poster, plus a round bus sign on a pole
+    bx = 240
+    d.rectangle([bx, 49, bx + 22, 50], fill=(96, 102, 150, 255)); d.line([bx, 48, bx + 22, 48], fill=(160, 166, 210, 255))
+    d.rectangle([bx + 2, 51, bx + 20, hz], fill=(196, 226, 246, 255))
+    for k in range(0, 12, 4):
+        d.line([bx + 3 + k, hz - 1, bx + 7 + k, 53], fill=(240, 250, 255, 255))      # glass reflections
+    d.rectangle([bx + 13, 53, bx + 19, 59], fill=(255, 150, 175, 255), outline=(255, 255, 255, 255))   # poster
+    d.rectangle([bx + 1, 51, bx + 1, hz + 1], fill=(96, 102, 150, 255)); d.rectangle([bx + 21, 51, bx + 21, hz + 1], fill=(96, 102, 150, 255))
+    d.rectangle([bx + 4, 58, bx + 12, 59], fill=(130, 82, 48, 255))                 # bench
+    d.rectangle([bx + 5, 60, bx + 5, hz], fill=(96, 102, 150, 255)); d.rectangle([bx + 11, 60, bx + 11, hz], fill=(96, 102, 150, 255))
+    d.rectangle([bx + 25, 46, bx + 26, hz + 1], fill=(110, 114, 146, 255))          # sign pole
+    d.ellipse([bx + 20, 36, bx + 31, 47], fill=BLUE + (255,), outline=(255, 255, 255, 255))
+    d.rectangle([bx + 22, 39, bx + 29, 43], fill=(255, 255, 255, 255))               # little bus
+    d.rectangle([bx + 23, 40, bx + 24, 41], fill=BLUE + (255,)); d.rectangle([bx + 26, 40, bx + 27, 41], fill=BLUE + (255,))
+    px[bx + 23, 44] = (255, 255, 255, 255); px[bx + 28, 44] = (255, 255, 255, 255)
     # elevated road in the foreground: guardrail, asphalt, edge lines, dashed centre line
     d.rectangle([0, hz + 2, W, H], fill=(74, 78, 116, 255))
     for k in range(hz + 2, H, 4):
