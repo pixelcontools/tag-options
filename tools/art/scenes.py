@@ -399,9 +399,9 @@ def citypop():
     d.polygon([(74, 44), (80, 44), (77, 39)], fill=(255, 120, 170, 255))
     for (cx, cy, rr) in ((52, 10, 3), (226, 8, 2), (102, 44, 2), (276, 40, 2)):
         sparkle(px, cx, cy, rr, (255, 255, 255))
-    # wordmark: plain brand-blue letters with one soft pink drop shadow (no bevel, no outline, single colour)
-    wordmark(im, y0=14, colors={c: BLUE for c in 'PIXELCONS'}, bevel=0, outline=None,
-             shadow=(236, 84, 140, 255))
+    # wordmark: brand-blue PI / CONS, red-pink XEL, one flat white drop shadow (no bevel, no outline)
+    wordmark(im, y0=14, colors={c: ((255, 62, 112) if c in 'XEL' else BLUE) for c in 'PIXELCONS'}, bevel=0, outline=None,
+             shadow=(255, 255, 255, 255))
     # vertical katakana, MS Gothic bitmap glyphs (authentic 80s pixel-Japanese look)
     f = ImageFont.truetype('C:/Windows/Fonts/msgothic.ttc', 12)
     km = Image.new('L', (W, H), 0); kd = ImageDraw.Draw(km); kd.fontmode = '1'
