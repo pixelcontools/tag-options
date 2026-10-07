@@ -6,5 +6,13 @@
   "w": 97,
   "h": 84,
   "chars": 21255
+ },
+ {
+  "id": "taiga",
+  "name": "Taiga",
+  "file": "taiga.html",
+  "w": 84,
+  "h": 84,
+  "chars": 6455
  }
 ]
