@@ -38,7 +38,7 @@ def js(value):
 
 def with_companion(tag_html, c):
     """Must match withComp() in tools/index.template.html."""
-    return ('<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; max-width: calc(100vw - 56px)">' + tag_html +
+    return ('<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; max-width: min(calc(100vw - 56px), calc(352px + max(0px, calc((100vh - 100vw) * 1000))))">' + tag_html +
             f'<span style="position: relative; display: inline-block; width: {c["w"]}px; height: {c["h"]}px">' + c['html'] + '</span></div>')
 
 

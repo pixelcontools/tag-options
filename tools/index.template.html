@@ -161,7 +161,7 @@ footer a{color:inherit}
 const TAGS = @@TAGS@@;
 const COMPS = @@COMPS@@;                 // companion images: [{id, name, w, h, html}], from docs/tags/companions/
 const compById = id => COMPS.find(c => c.id === id);
-const WRAP = 'display: flex; flex-wrap: wrap; justify-content: center; align-items: center; max-width: calc(100vw - 56px)', PLAIN_ROW = 'display: inline-flex; align-items: center';
+const WRAP = 'display: flex; flex-wrap: wrap; justify-content: center; align-items: center; max-width: min(calc(100vw - 56px), calc(352px + max(0px, calc((100vh - 100vw) * 1000))))', PLAIN_ROW = 'display: inline-flex; align-items: center';
 const withComp = (h, id) => {
   const c = compById(id);
   return c ? '<div style="' + WRAP + '">' + h +
@@ -210,8 +210,9 @@ function sizeOf(t) {
 
 // sizeAs: markup whose width decides the scale. Passing the 'few' version keeps a tag the same size on screen whatever the hearts
 // setting is (without it the narrower no-hearts classic tags were scaled down less and looked bigger).
-// Pasted tags with a companion wrap it under the banner when the site's panel is narrower than the tag (calc(100vw - 56px) is about the
-// width of the panel on a phone). The gallery previews scale to fit instead, so they show the one-line version.
+// Pasted tags with a companion wrap it under the banner when the site's panel is narrower than the tag. max-width = the panel's content width:
+// PORTRAIT (phones, 100vh >= 100vw): 100vw - 56px; LANDSCAPE (desktop, panel fixed at 384px): 352px. The max(0px, (100vh - 100vw) * 1000) term
+// is 0 in landscape and huge in portrait, which is an orientation switch without a media query. The gallery previews scale to fit instead, so they show the one-line version.
 const unwrap = m => m && m.split(WRAP).join(PLAIN_ROW);
 function mount(host, markup, maxW, sizeAs) {
   markup = unwrap(markup); sizeAs = unwrap(sizeAs);
@@ -340,7 +341,7 @@ window.addEventListener('message', e => {
 });
 // The site switches layout on the screen's orientation (its `portrait:` rules). The preview keeps the two cases explicit instead of
 // flipping at some width: a phone/tablet in PORTRAIT (panel = 95% of the screen width, any width from the slider) or a DESKTOP/LANDSCAPE
-// window (panel is a fixed 384 px at the left, so a tag wider than that hangs out over the map; nothing can wrap it).
+// window (panel is a fixed 384 px at the left; the tag wrapper's max-width switches to 352 px there, so the companion wraps instead of hanging out).
 function setWidth(w) {
   w = Math.max(320, Math.min(700, Math.round(w)));
   desk = false;
@@ -353,7 +354,7 @@ function setDesktop() {
   desk = true;
   const f = $('#pframe'); f.style.height = '420px'; f.style.width = '700px';
   $('#pw').value = 700; $('#pwv').textContent = 'Desktop'; $('#pdesk').classList.add('on');
-  $('#pwnote').textContent = 'Landscape / desktop: geopixels.net shows the panel at a fixed 384 px wide on the left, so a tag wider than that hangs out over the map (it is not cut, and it cannot wrap).';
+  $('#pwnote').textContent = 'Landscape / desktop: geopixels.net shows the panel at a fixed 384 px wide on the left, so a tag wider than its 352 px content area wraps the companion image under the banner (a tag without that wrapper would hang out over the map).';
   if (pv && pReady) revealTag();
 }
 function setView(on) {
