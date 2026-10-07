@@ -70,6 +70,7 @@ Numbering: options keep their number forever (people reply with numbers). Next f
   City Pop details the user dictated: elevated road + guardrail over a pastel skyline, white Lamborghini Countach with speed lines, sign with the heart-sob sprite and an arrow pointing the car's direction,
   tiny glowing street lights, a glass bus stop, katakana ピクセルコンズ down the left (MS Gothic bitmap glyphs, `C:/Windows/Fonts/msgothic.ttc` size 12), lettering blue/red-pink with a flat shadow.
   Gold-to-blue variant: sky, sun, skyline, road tint and lamp glow all follow the guild gradient (warm left, cool right).
+- **Spacing**: every scene tag (22-29) is wrapped in **26 px of side padding** whether or not the hearts are shown, so the tag is always 429 px wide with Roll-sized companions and the gap to the companion image is always 26 px. The hearts toggle must never change the layout. A bare banner with no padding looks cramped next to the companion (that was a bug in 22 and the no-hearts variants).
 - **Hearts**: scene tags get exactly **two hearts: yellow left, blue right**, beside the banner, vertically centred, 24 px, glowing, pulsing out of phase,
   rendered **on top** of the banner (`z-index: 2` vs the image's `1`). The user rejected many floating hearts because they covered the art. The gallery's **Extra hearts** toggle switches this pair on/off.
 - **Sparkles**: three tiny white plus-shaped CSS sparkles that pulse (`1px` element + 4 box-shadows, pulse keyframe) sit over each scene. Keep them subtle.
@@ -160,7 +161,7 @@ Choosing/prepping images:
 - **Keep it compact and simple.** Roll is 97 px wide. The user tried a 141 px-wide, detailed winged-character illustration (NH404.png) and **dropped it: "too wide and detailed"**. The converter warns above 110 px wide; crop to the subject, pick a simpler/closer image, or tell the user the aspect ratio makes it wide before publishing it.
 - Transparent background, one clear subject. If the picture is opaque on a flat colour, add `--trim-bg` (top-left pixel colour becomes transparent).
 - Looks best as pixel art or flat illustration. Photos, gradients and fine texture compress badly - expect the ladder to cut colours; say so and show the `--preview` (4x on light grey) before publishing.
-- `--id`: lowercase letters, digits, `-`, `_` only (it becomes a folder and file name). `--name` is the dropdown label.
+- `--id`: lowercase letters, digits, `-`, `_` only (it becomes a folder and file name). `--name` is the label shown in the picker: **always a capitalised proper name** ("Gura", "Fallenshadow", "M200"); the converter capitalises a lower-case first letter for you.
 - To **remove** a companion: delete its entry from `companions.json` and its `.html`, run `build.py` (it deletes the stale `with-<id>/` folder).
 - To **change the default** companion: the page defaults to id `roll` (`let comp = compById('roll') ? 'roll' : ''` in `tools/index.template.html`).
 - Don't convert with `tools/img2tag.py` (box-shadow pixels): it is ~5x bigger, lags the gallery and shows seams at 125%/150% scaling. It stays only for experiments.

@@ -69,6 +69,10 @@ def main():
     if not re.fullmatch(r'[a-z0-9_-]+', a.id):
         sys.exit('--id must be lowercase letters, digits, - or _')
 
+    name = a.name or a.id
+    if name[0].islower():                         # names are proper nouns: keep the dropdown/picker consistent
+        name = name[0].upper() + name[1:]
+        print(f'  note: name capitalised to {name!r}')
     im = prepare(a.image, a.trim_bg, a.alpha_cut)
     best = None
     height = a.height
@@ -90,7 +94,7 @@ def main():
     idx_path = os.path.join(COMP_DIR, 'companions.json')
     idx = json.load(open(idx_path, encoding='utf-8')) if os.path.exists(idx_path) else []
     idx = [c for c in idx if c['id'] != a.id]
-    idx.append({'id': a.id, 'name': a.name or a.id, 'file': a.id + '.html', 'w': w, 'h': height, 'chars': len(html)})
+    idx.append({'id': a.id, 'name': name, 'file': a.id + '.html', 'w': w, 'h': height, 'chars': len(html)})
     idx.sort(key=lambda c: (c['id'] != 'roll', c['name'].lower()))             # Roll stays first
     with open(idx_path, 'w', encoding='utf-8', newline='\n') as f:
         json.dump(idx, f, indent=1, ensure_ascii=False)

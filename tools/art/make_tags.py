@@ -46,9 +46,8 @@ def sparkle(x, y, dur, dl):
 def build(png_bytes, count, band, seed):
     img = ('<img src="data:image/png;base64,' + base64.b64encode(png_bytes).decode() +
            f'" width="{BW}" height="{BH}" style="display: block; position: relative; z-index: 1; image-rendering: pixelated" alt="">')
-    if count == 0:
-        return ('<span style="position: relative; display: inline-block; width: 280px; height: 84px">' + img +
-                sparkle(90, 12, 2.6, -0.4) + sparkle(171, 70, 3.1, -1.7) + sparkle(246, 22, 2.8, -1.1) + '</span>')
+    # the side padding is always there (it is where the hearts go), so the tag keeps the same size and the same gap to the
+    # companion image whether the hearts are on or off
     return (f'<span style="position: relative; display: inline-block; padding: {PAD_Y}px {PAD_X}px">' + img +
             sparkle(PAD_X + 90, PAD_Y + 10, 2.6, -0.4) + sparkle(PAD_X + 171, PAD_Y + 70, 3.1, -1.7) + sparkle(PAD_X + 246, PAD_Y + 20, 2.8, -1.1) +
             hearts(count, band, seed) + '</span>')
