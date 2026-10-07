@@ -254,7 +254,13 @@ function toggleSection(sec) {
   else sec.el.querySelector('.grid').innerHTML = '';     // closing: just hide, no animation
 }
 function renderGrid() {                      // re-render after a toggle / resize: samples always, cards only for open sections, no entrance animation
+  // Rebuilding empties the grids, and mount() measures widths while they are half-built, so the page briefly gets shorter and the
+  // browser clamps the scroll position (on a phone you were thrown back to the top). Keep each section's height and the scroll position until done.
+  const y = window.scrollY, grids = SECTIONS.map(sec => sec.el.querySelector('.grid'));
+  grids.forEach(g => { g.style.minHeight = g.offsetHeight + 'px'; });
   SECTIONS.forEach(sec => { renderSample(sec); renderCards(sec, false); });
+  grids.forEach(g => { g.style.minHeight = ''; });
+  if (window.scrollY !== y) window.scrollTo(0, y);
 }
 SECTIONS.forEach(sec => {
   sec.el = document.getElementById('sec-' + sec.id);
