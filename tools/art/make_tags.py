@@ -1,4 +1,4 @@
-"""Build tag HTML for the PNG scenes at three heart levels (none / few / many) and update docs/tags.
+"""Build tag HTML for the PNG scenes with and without the heart pair (none / pair) and update docs/tags.
 
     python make_tags.py <scenes_dir> <repo_root>
 """

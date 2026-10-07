@@ -1,0 +1,158 @@
+---
+name: new-guild-tag
+description: "Use when the user says 'I want a new guild tag design', 'make a new guild tag', 'design a tag for <guild>', 'add a tag option', 'new scene for the tag gallery', or asks to change/remove/regenerate an option in the tag-options gallery. Designs a GeoPixels guild tag (pixel-art banner PNG + the HTML to paste into geopixels.net), generates the tag files, adds them to the GitHub Pages gallery in docs/, tests it in a browser, and commits/pushes. Contains the site's hard constraints (CSP, sanitising, size evidence), the house style, and the pitfalls already hit."
+---
+
+# New guild tag (tag-options repo)
+
+This repo is a gallery of guild-tag options for the PIXELCONS guild on geopixels.net, published with GitHub Pages
+from `docs/` at https://pixelcontools.github.io/tag-options/ (repo: `pixelcontools/tag-options`). A "tag" is one blob of
+HTML the user pastes into *Guild settings -> Tag* on the site. This skill is how new ones get made.
+
+Work from the repo root (`geopixels-scratch/tag-options`). The parent `geopixels-scratch` folder has no usable git; **this repo does**.
+
+---
+
+## 1. What a guild tag is on geopixels.net (facts, with where they came from)
+
+- The tag is **raw HTML**, stored as-is and shown in the hover panel (`#hoverInfo`) via `innerHTML = userData.guildTag`
+  (`js/index.js` in the parent repo, `showPixelUser`). The client only strips `<script>` for the settings preview. The server's
+  sanitising, if any, is unknown. Tags are fetched fresh with `POST /GetUserProfile` on every inspect (no client caching;
+  the response is gzip'd, ~5x smaller on the wire).
+- **Content-Security-Policy** (checked 2026-10-06 with `curl -sI https://geopixels.net/`): `img-src 'self' data: blob: https://*.catbox.moe https://catbox.moe https://*.imgur.com https://imgur.com`.
+  So: **`data:` images work** (that is how Cub Beach and our scenes are built), external images from any other host are blocked
+  (the pipedream tracker in gycra's tag is blocked), and `script-src` allows `'unsafe-inline'`. Re-check the header if something stops rendering.
+- **What works in a tag**: inline `style="..."`, `<span>/<div>/<img>`, inline `<svg>` with SMIL (`<animate>`, `<animateTransform>`, `<animateMotion>`),
+  CSS `animation:` that uses the **page's own keyframes `maplibregl-user-location-dot-pulse`** (0% scale 1/opacity 1 -> 70% scale 3/opacity 0 -> 100% back).
+  Existing tags in the wild use nothing else.
+- **What to avoid**: `<style>` blocks (no existing tag uses one; unverified), `<script>`, `on*=` handlers, `javascript:` URLs, `<iframe>/<form>/<link>`,
+  any external URL other than catbox/imgur. Never paste another user's tag verbatim (gycra's contains a tracking URL).
+- **Size**: the largest tag known to be accepted is gycra's at **211,642 characters** (6,211 box-shadow pixels). Nothing above that is tested. Our budget: stay
+  well under it. Typical here: plain scene 7-22 KB, with Roll 29-43 KB (Pixel Space is the biggest at ~43 KB). Keep new tags under ~50 KB with Roll.
+- Fonts: the page loads only Noto Sans. A tag that asks for `"Press Start 2P"` falls back to Courier New. Don't rely on web fonts; rasterise lettering into the PNG.
+- Emoji hearts (U+1F49B yellow, U+1F499 blue) render with the viewer's emoji font. They are the guild's mark.
+
+## 2. Repo map
+
+```
+docs/index.html            the gallery page (GENERATED - never edit by hand)
+docs/tags/manifest.json    list of options (number, name, description, files)
+docs/tags/plain/*.html     each tag, tag only
+docs/tags/with-roll/*.html each tag + the Roll image appended (what the "Include Roll image" toggle copies)
+docs/tags/roll.html        the Roll image as an embedded PNG (97x84)
+tools/build.py             docs/tags/ + tools/index.template.html -> docs/index.html
+tools/index.template.html  the gallery page source (carousel-free grid, Roll / Extra hearts / Animate highlighted toggles, copy+download, modal)
+tools/art/scenes.py        pixel-art banner generators (PIL): night, arcade, space, sky, citypop (+ gold-to-blue). Shared helpers inside.
+tools/art/make_tags.py     scene PNG -> tag HTML (none / pair-of-hearts) -> docs/tags + manifest
+tools/art/make_banner.py   the original Pixel Dawn banner (22/23 were assembled by hand from its PNG; see 4c)
+tools/art/make_roll.py     rebuild docs/tags/roll.html from roll_gyate.png
+tools/art/preview.py       magnified light/dark preview sheet of banner PNGs
+tools/art/heartsob.png     8x8 heart-sob sprite used on City Pop's sign
+tools/img2tag.py           image -> box-shadow pixel-art tag (compact hex/1px form). Only for flat art; PNG data URI is smaller and sharper.
+```
+
+Numbering: options keep their number forever (people reply with numbers). Next free number = `max(n) + 1` in `manifest.json` (it was 29 when this skill was written;
+5/7/9... gaps are intentional, removed options are not renumbered). The "current tag" is number 0.
+
+## 3. House style (what the user has already approved)
+
+- **Canvas**: banner PNG **280 x 84** px, drawn at 1x pixel art, displayed with `image-rendering: pixelated`. 84 px high so it lines up with Roll (97 x 84).
+- **Brand**: gold `#ffca3a` (255,202,58), light blue (199,235,250), blue `#1982c4` (25,130,196), red `#e71d36` (231,29,54). The main tag is a 135deg gold -> light blue -> blue
+  gradient. The wordmark reads **PI** (blue) **XEL** (red / red-pink) **CONS** (blue). New designs may bend the palette but should still read as PIXELCONS.
+- **Wordmark**: use `wordmark()` in `scenes.py`: chunky 5x7 pixel font at 3x scale, slanted, `PIXELCONS`, 159 px wide. Options: outline (2 px), flat or bevelled fill, drop shadow, glow.
+  Keep it legible on both light and dark backgrounds and over the whole scene (outline or shadow if the sky is blue).
+- **Lettering band**: note the y-range the letters occupy (`y0` .. `y0+21`, minus/plus outline) - `make_tags.py` needs it as `band`.
+- **Pixel-art techniques**: banded + Bayer-dithered gradients (`gradient()`), 1-px sparkles (`sparkle()`), blocky clouds, stepped skylines (`skyline()`), simple hand-placed sprites.
+  Rounded corners + soft white edge via `finish()`. Prefer a clear concept (a place/time/mood) over decoration.
+- **Scenes done so far**: Pixel Dawn (22/23), Night (24), Arcade/synthwave (25), Space (26), Sky islands (27), City Pop (28) and City Pop Gold-to-Blue (29).
+  City Pop details the user dictated: elevated road + guardrail over a pastel skyline, white Lamborghini Countach with speed lines, sign with the heart-sob sprite and an arrow pointing the car's direction,
+  tiny glowing street lights, a glass bus stop, katakana ピクセルコンズ down the left (MS Gothic bitmap glyphs, `C:/Windows/Fonts/msgothic.ttc` size 12), lettering blue/red-pink with a flat shadow.
+  Gold-to-blue variant: sky, sun, skyline, road tint and lamp glow all follow the guild gradient (warm left, cool right).
+- **Hearts**: scene tags get exactly **two hearts: yellow left, blue right**, beside the banner, vertically centred, 24 px, glowing, pulsing out of phase,
+  rendered **on top** of the banner (`z-index: 2` vs the image's `1`). The user rejected many floating hearts because they covered the art. The gallery's **Extra hearts** toggle switches this pair on/off.
+- **Sparkles**: three tiny white plus-shaped CSS sparkles that pulse (`1px` element + 4 box-shadows, pulse keyframe) sit over each scene. Keep them subtle.
+- **Roll**: the user likes Roll; every option must work with it appended. It is `docs/tags/roll.html`, a PNG data URI in a 97x84 box, appended by the wrapper
+  `<div style="display: inline-flex; align-items: center">TAG<span style="position: relative; display: inline-block; width: 97px; height: 84px">ROLL</span></div>`.
+- Reduce stylisation when asked: the user has repeatedly steered toward **simpler** lettering (single colour + one shadow) and **chunkier** sprites (draw 8x8 sprites at 2x).
+
+## 4. Workflow
+
+### 4a. Understand the ask (one question at most)
+If the user gives a theme ("retro Japan", "space"), start. If they only say "new guild tag design", propose 3 short concepts with a recommendation and ask which one;
+that is a creative decision that is theirs. Don't ask about technical choices - they are fixed by this skill.
+If they supply a reference/sprite image: read it, and if it is clean pixel art, **extract its native grid and use it as-is** instead of re-drawing:
+detect the block size from colour runs (`row = [im.getpixel((x,y)) ...]`, count run lengths), sample each cell centre, treat the background colour as transparent,
+verify by upscaling back and diffing against the source, then save as a small PNG in `tools/art/` and draw it with a `scale` (see `heartsob()`).
+Note any margin offset: the grid origin is not always at 0 (heartsob v2 started 38 px in).
+
+### 4b. Draw the scene (scene tags, the normal case)
+1. Add a function `def myscene():` to `tools/art/scenes.py` returning a 280x84 RGBA image: `gradient()` sky -> backdrop -> `skyline()`/props -> `sparkle()`s -> `wordmark(im, y0=..., colors=..., outline=..., shadow=..., glow=...)` -> `finish(im)`.
+   Use `citypop()` as the model for a rich scene and `night()` for a compact one. Draw order matters (lettering last, before katakana/captions).
+2. Register it in the list at the bottom of `scenes.py` (`for name, fn in ((...), ('myscene', myscene))`).
+3. Generate and look at it: `python tools/art/scenes.py <scratch dir>` then `python tools/art/preview.py <scratch>/sheet.png <scratch>/myscene.png --zoom 3` and open the sheet.
+   Check: wordmark legible on **both** backgrounds, nothing important under the lettering, corners/edge clean, one clear focal idea. Iterate (expect 2-4 rounds). Fix the first draft's problems you can see - e.g. a sun hidden behind the lettering, an island clipping a letter.
+4. Typical PNG size is 5-15 KB (dithered nebulae are the heavy case). Keep palettes small and avoid noise.
+
+### 4c. Turn it into tags
+1. In `tools/art/make_tags.py`, add a tuple to `SCENES`: `('myscene.png', N, 'Pixel Name', 'one-sentence description', (band_y0, band_y1))`.
+   **Names: letters, numbers, spaces only is safest.** A colon in a name produced broken files on Windows (NTFS alternate stream); slugs are now sanitised with a regex, but keep names clean anyway.
+2. Run `python tools/art/make_tags.py <scratch dir with the PNGs> .` (repo root). This writes, per scene, `NN_slug_hearts_none.html` and `..._hearts_pair.html` into `docs/tags/plain/` and
+   `docs/tags/with-roll/`, and updates `docs/tags/manifest.json`. It also deletes stale `_few/_many` files.
+3. `python tools/build.py` regenerates `docs/index.html`. (The page sorts by number.)
+4. Text-style (non-PNG) tags and Pixel Dawn were assembled outside `make_tags.py`: put the final HTML in `docs/tags/plain/NN_slug.html`, the with-Roll wrapper version in `docs/tags/with-roll/`,
+   add a manifest entry `{"n": N, "name": ..., "desc": ..., "file": "NN_slug.html"}`, then `build.py`. For SVG/SMIL text effects see section 5.
+5. **Regenerating Roll** (new source image / size change): `python tools/art/make_roll.py [source.png]` (default `D:\wplace\geopixels\roll_gyate.png`), then re-run `make_tags.py` and re-wrap any hand-made with-roll files.
+
+### 4d. Test before pushing
+1. Serve `docs/` locally: `python -m http.server 8123` (run it in the background from `docs/`), open `http://localhost:8123/` in the Browser pane.
+2. Verify with JS or by eye: the new card exists and its images load (`naturalWidth > 0`), the modal opens and the textarea contains the same HTML as `docs/tags/...`,
+   **Include Roll image** and **Extra hearts** toggles change the card/modal/download name as expected, no console errors.
+3. Check the **size** of the new files (character count) against the budget in section 1 and say how they rank vs the largest existing combo (Pixel Space with Roll, ~43 KB).
+4. **Stop the server afterwards** (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='python.exe'" | Where-Object { $_.CommandLine -match 'http.server 8123' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }`).
+5. Browser pane notes: it may need the viewport reset (`resize_window` preset desktop); screenshots of the page are low-res, so judge art from the preview sheet and numbers from JS.
+
+### 4e. Commit and push
+The user's shell is **Windows PowerShell 5.1: `&&` does not work** - chain with `;` or run separate commands. Use the PowerShell tool for git:
+
+```powershell
+Set-Location "C:\Users\jr\Documents\GitHub\geopixels-scratch\tag-options"
+git add -A
+git commit -m @'
+Short summary line
+
+Why / what changed.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+'@
+git push origin main
+```
+
+- **Do not put double quotes inside the commit message** (PowerShell splits the argument). Single-quoted here-string, closing `'@` at column 0.
+- The user has authorised pushing this repo's gallery so feedback can be gathered; still say what was pushed. GitHub Pages rebuilds in ~1 minute (a 404 right after a push is normal).
+- Always commit the regenerated `docs/index.html` together with the `docs/tags` changes.
+
+## 5. Text / SVG tags (no PNG)
+
+Use `docs/tags/plain/00_current_tag.html` as the structural reference (outer padded span -> big hearts -> gradient badge with three blur blobs and the three lettering spans -> floating hearts).
+Rules learned:
+- Letter-by-letter or colour effects need **inline SVG text + SMIL**, not CSS (the only CSS keyframe available is the pulse one). SVG box 147.6 x 27 px, letters at `x = i * 16.4`, baseline y=20, Courier New bold italic 24px.
+- The glow of the real tag is `text-shadow: 0 0 8px #fff, 0 0 14px <colour>`; reproduce it with an SVG filter (blur white 4 + blur colour 7 + source), **not** stacked CSS `drop-shadow` (that doubles the glow and washes the text out).
+- SMIL timing: pick a "rest" moment where every letter is visible; the gallery freezes cards at `REST[n]` seconds (default 3.9) in `tools/index.template.html` when **Animate highlighted** is on. Add an entry if a new effect looks wrong when frozen.
+- Overlays that must stay inside the badge go before the lettering inside the badge span (it has `overflow: hidden`); anything outside goes in the outer span.
+- Ids inside inline SVG are page-global: prefix them (`gpp-...` in this repo) and expect duplicates across cards to be identical.
+
+## 6. Pitfalls already hit (don't repeat)
+
+- Heart-count variants (few/many) covered the artwork and were rejected -> two hearts only, on top.
+- 6,000-shadow box-shadow pixel art (Roll, gycra style) makes the gallery lag when 20+ copies are on screen and is 5x bigger than a PNG data URI -> embed PNGs.
+- At 125% / 150% Windows scaling, art built from an 8 px box-shadow grid scaled by 0.125 shows seams; 1 px offsets or PNGs don't.
+- `getComputedStyle(...).animationPlayState` can be empty on elements you didn't mean to inspect; query the actual animated element.
+- A test that holds a DOM node across `renderGrid()` reads stale state (the grid is rebuilt on toggles).
+- Windows file names: no `:` `?` `*` etc. Check `ls docs/tags/plain | grep ':'` returns nothing.
+- Don't leave stray http servers running between steps.
+- `python` here is 3.13 with Pillow + numpy; heredocs with unusual quoting sometimes break in bash - prefer writing a file with the Write tool for anything long.
+
+## 7. Done means
+
+New files exist in `docs/tags/plain` and `with-roll`, `manifest.json` has the entry, `docs/index.html` is rebuilt, the card was seen working in the browser, sizes were reported,
+the change is pushed, and the reply ends with **Next:** (what happens next / what is blocked on the user). Mention the Pages URL.
