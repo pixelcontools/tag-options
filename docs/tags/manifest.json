@@ -81,13 +81,11 @@
   "n": 22,
   "name": "Pixel Dawn",
   "desc": "A pixel-art sunrise skyline banner with a chunky PIXELCONS wordmark and twinkling sparkles. One embedded PNG, so it stays light and sharp.",
-  "file": "22_pixel_dawn.html"
- },
- {
-  "n": 23,
-  "name": "Pixel Dawn Hearts",
-  "desc": "Pixel Dawn with the guild hearts (yellow and blue) floating around and over the banner, pulsing like your current tag does.",
-  "file": "23_pixel_dawn_hearts.html"
+  "levels": {
+   "none": "22_pixel_dawn_hearts_none.html",
+   "few": "22_pixel_dawn_hearts_few.html",
+   "all": "22_pixel_dawn_hearts_all.html"
+  }
  },
  {
   "n": 24,
@@ -95,7 +93,8 @@
   "desc": "The skyline after dark: crescent moon, shooting star, glowing wordmark and lit windows.",
   "levels": {
    "none": "24_pixel_night_hearts_none.html",
-   "pair": "24_pixel_night_hearts_pair.html"
+   "few": "24_pixel_night_hearts_few.html",
+   "all": "24_pixel_night_hearts_all.html"
   }
  },
  {
@@ -104,7 +103,8 @@
   "desc": "Retro synthwave: striped sun, neon grid floor, scanlines and a pink-glow wordmark.",
   "levels": {
    "none": "25_pixel_arcade_hearts_none.html",
-   "pair": "25_pixel_arcade_hearts_pair.html"
+   "few": "25_pixel_arcade_hearts_few.html",
+   "all": "25_pixel_arcade_hearts_all.html"
   }
  },
  {
@@ -113,7 +113,8 @@
   "desc": "A starfield with nebula clouds, a ringed gold planet and a blue moon behind the wordmark.",
   "levels": {
    "none": "26_pixel_space_hearts_none.html",
-   "pair": "26_pixel_space_hearts_pair.html"
+   "few": "26_pixel_space_hearts_few.html",
+   "all": "26_pixel_space_hearts_all.html"
   }
  },
  {
@@ -122,7 +123,8 @@
   "desc": "Retro Japan, 80s city pop: a white Countach cruises an elevated road above a pastel Tokyo skyline with street lights and a bus stop, toward a sign with a heart-shaped sobbing face and an arrow. Katakana (ピクセルコンズ) runs down the side.",
   "levels": {
    "none": "28_pixel_city_pop_hearts_none.html",
-   "pair": "28_pixel_city_pop_hearts_pair.html"
+   "few": "28_pixel_city_pop_hearts_few.html",
+   "all": "28_pixel_city_pop_hearts_all.html"
   }
  },
  {
@@ -131,7 +133,8 @@
   "desc": "City Pop again, but the whole scene follows the guild gradient: golden hour on the left cooling to blue on the right, down to the skyline, road tint and lamp glow.",
   "levels": {
    "none": "29_pixel_city_pop_gold_to_blue_hearts_none.html",
-   "pair": "29_pixel_city_pop_gold_to_blue_hearts_pair.html"
+   "few": "29_pixel_city_pop_gold_to_blue_hearts_few.html",
+   "all": "29_pixel_city_pop_gold_to_blue_hearts_all.html"
   }
  },
  {
@@ -140,7 +143,8 @@
   "desc": "Bright sky islands with trees, a little red-roofed house and drifting clouds.",
   "levels": {
    "none": "27_pixel_sky_hearts_none.html",
-   "pair": "27_pixel_sky_hearts_pair.html"
+   "few": "27_pixel_sky_hearts_few.html",
+   "all": "27_pixel_sky_hearts_all.html"
   }
  }
 ]

@@ -1,4 +1,5 @@
-"""Build tag HTML for the PNG scenes with and without the heart pair (none / pair) and update docs/tags (plain/ + manifest.json).
+"""Build tag HTML for the PNG scenes at three heart levels (none / few / all) and update docs/tags (plain/ + manifest.json).
+few = a yellow and a blue heart beside the banner; all = that pair plus small hearts floating over the banner around the lettering.
 The with-<companion>/ folders are produced by `python tools/build.py`.
 
     python make_tags.py <scenes_dir> <repo_root>
@@ -10,10 +11,11 @@ GOLD, BLUE = '#ffca3a', '#1982c4'
 YEL, BLU = '\U0001f49b', '\U0001f499'
 PAD_Y, PAD_X = 0, 26                    # side padding leaves room for the two hearts beside the banner
 BW, BH = 280, 84
-LEVELS = {'none': 0, 'pair': 2}
+LEVELS = {'none': 0, 'few': 2, 'all': 16}       # number of hearts per level
 
 SCENES = [
     # file, number, name, description, lettering band (banner y0, y1)
+    ('dawn.png', 22, 'Pixel Dawn', 'A pixel-art sunrise skyline banner with a chunky PIXELCONS wordmark and twinkling sparkles. One embedded PNG, so it stays light and sharp.', (27, 52)),
     ('night.png', 24, 'Pixel Night', 'The skyline after dark: crescent moon, shooting star, glowing wordmark and lit windows.', (27, 52)),
     ('arcade.png', 25, 'Pixel Arcade', 'Retro synthwave: striped sun, neon grid floor, scanlines and a pink-glow wordmark.', (13, 38)),
     ('space.png', 26, 'Pixel Space', 'A starfield with nebula clouds, a ringed gold planet and a blue moon behind the wordmark.', (27, 52)),
@@ -23,19 +25,37 @@ SCENES = [
 ]
 
 
+SPARKS = [(90, 10, 2.6, -0.4), (171, 70, 3.1, -1.7), (246, 20, 2.8, -1.1)]
+DAWN_SPARKS = [(90, 12, 2.6, -0.4), (171, 50, 3.1, -1.7), (246, 24, 2.8, -1.1), (30, 24, 3.4, -2.3), (120, 56, 2.9, -0.9)]
+
+
 def heart(emo, col, size, dur, delay, pos):
     return (f'<span style="position: absolute; {pos}; font-size: {size}px; line-height: 1; filter: drop-shadow(0 0 {max(3, size // 4)}px {col}); '
             f'animation: {dur}s linear {delay}s infinite {P}">{emo}</span>')
 
 
 def hearts(count, band, seed):
-    """none -> nothing; pair -> one yellow heart left and one blue heart right of the banner, centred vertically.
-    They render on top of the banner (z-index 2 vs 1)."""
+    """0 -> nothing; 2 -> one yellow heart left and one blue heart right of the banner, centred vertically;
+    more -> that pair plus small hearts floating over the banner above/below the lettering band. All render on top (z-index 2)."""
     if count == 0:
         return ''
     mid = PAD_Y + BH // 2 - 12
-    return (heart(YEL, GOLD, 24, 2.0, -2.0, f'left: 2px; top: {mid}px; z-index: 2') +
-            heart(BLU, BLUE, 24, 2.0, -1.0, f'right: 2px; top: {mid}px; z-index: 2'))
+    out = [heart(YEL, GOLD, 24, 2.0, -2.0, f'left: 2px; top: {mid}px; z-index: 2'),
+           heart(BLU, BLUE, 24, 2.0, -1.0, f'right: 2px; top: {mid}px; z-index: 2')]
+    r = random.Random(seed)
+    ly0, ly1 = band
+    n_float = count - 2
+    xs = [(i + 0.5) / n_float for i in range(n_float)] if n_float else []
+    r.shuffle(xs)                                   # x slots spread across the banner; alternate above / below the lettering
+    for i, x in enumerate(xs):
+        emo, col = (YEL, GOLD) if i % 2 == 0 else (BLU, BLUE)
+        size = r.choice([8, 9, 10, 11, 12, 13])
+        above = (i % 2 == 0) and ly0 > 24
+        lo, hi = (3, max(4, ly0 - 5 - size)) if above else (ly1 + 5, BH - size - 3)
+        y = PAD_Y + round(lo + r.random() * max(0, hi - lo))
+        out.append(heart(emo, col, size, round(1.7 + r.random() * 1.1, 1), -round(r.random() * 2.4, 1),
+                         f'left: {PAD_X + round(x * (BW - 16))}px; top: {y}px; z-index: 2'))
+    return ''.join(out)
 
 
 def sparkle(x, y, dur, dl):
@@ -43,30 +63,33 @@ def sparkle(x, y, dur, dl):
             f'box-shadow: 0 -1px #fff, 0 1px #fff, -1px 0 #fff, 1px 0 #fff; animation: {dur}s ease-out {dl}s infinite {P}"></span>')
 
 
-def build(png_bytes, count, band, seed):
+def build(png_bytes, count, band, seed, sparks=None):
     img = ('<img src="data:image/png;base64,' + base64.b64encode(png_bytes).decode() +
            f'" width="{BW}" height="{BH}" style="display: block; position: relative; z-index: 1; image-rendering: pixelated" alt="">')
     # the side padding is always there (it is where the hearts go), so the tag keeps the same size and the same gap to the
     # companion image whether the hearts are on or off
     return (f'<span style="position: relative; display: inline-block; padding: {PAD_Y}px {PAD_X}px">' + img +
-            sparkle(PAD_X + 90, PAD_Y + 10, 2.6, -0.4) + sparkle(PAD_X + 171, PAD_Y + 70, 3.1, -1.7) + sparkle(PAD_X + 246, PAD_Y + 20, 2.8, -1.1) +
+            ''.join(sparkle(PAD_X + x, PAD_Y + y, d, dl) for x, y, d, dl in (sparks or SPARKS)) +
             hearts(count, band, seed) + '</span>')
 
 
 def main(scenes_dir, root):
     tags = os.path.join(root, 'docs', 'tags')
     man = json.load(open(os.path.join(tags, 'manifest.json'), encoding='utf-8'))
-    man = [m for m in man if m['n'] not in {s[1] for s in SCENES}]
+    man = [m for m in man if m['n'] not in {s[1] for s in SCENES} | {23}]       # 23 (Pixel Dawn Hearts) is now the 'all' level of 22
     for fname, n, name, desc, band in SCENES:
-        png = open(os.path.join(scenes_dir, fname), 'rb').read()
+        src = os.path.join(scenes_dir, fname)
+        if not os.path.exists(src):                                      # dawn.png is a committed asset, not generated by scenes.py
+            src = os.path.join(root, 'tools', 'art', fname)
+        png = open(src, 'rb').read()
         slug = re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')      # no colons etc. in file names
-        for stale in ('few', 'many'):                                    # older heart-count variants
+        for stale in ('pair', 'many'):                                   # older heart-count variants
             p = os.path.join(tags, 'plain', f'{n:02d}_{slug}_hearts_{stale}.html')
             if os.path.exists(p):
                 os.remove(p)
         files = {}
         for lvl, count in LEVELS.items():
-            html = build(png, count, band, n * 31)
+            html = build(png, count, band, n * 31, DAWN_SPARKS if n == 22 else None)
             f = f'{n:02d}_{slug}_hearts_{lvl}.html'
             with open(os.path.join(tags, 'plain', f), 'w', encoding='utf-8', newline=chr(10)) as fh:
                 fh.write(html)
