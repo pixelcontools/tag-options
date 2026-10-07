@@ -16,6 +16,14 @@
   "chars": 4187
  },
  {
+  "id": "rossi",
+  "name": "Rossi",
+  "file": "rossi.html",
+  "w": 86,
+  "h": 84,
+  "chars": 5807
+ },
+ {
   "id": "taiga",
   "name": "Taiga",
   "file": "taiga.html",
