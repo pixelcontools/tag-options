@@ -111,7 +111,7 @@ Note any margin offset: the grid origin is not always at 0 (heartsob v2 started 
 2. Verify with JS or by eye: the new card exists and its images load (`naturalWidth > 0`), the modal opens and the textarea contains the same HTML as `docs/tags/...`,
    the **Companion image** picker (top bar and popup buttons stay in sync; hover tiles to see names; Escape closes the picker before the popup) and the **Extra hearts** toggle change the card/modal/download name as expected (`..._with_<id>.html`), no console errors.
    Spot-check that the page's composition equals a generated file: the popup textarea for a tag+companion should equal `docs/tags/with-<id>/<file>`.
-3. Check the **size** of the new files (character count) against the budget in section 1 and say how they rank vs the largest existing combo (Pixel Space with Roll, ~43 KB; a 256-colour companion is typically only ~6 KB).
+3. Check the **size** of the new files (character count) against the budget in section 1 and say how they rank vs the largest existing combo (Pixel Space with Roll, ~27 KB; a 256-colour companion is typically only ~6 KB).
 4. **Stop the server afterwards** (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='python.exe'" | Where-Object { $_.CommandLine -match 'http.server 8123' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }`).
 5. Browser pane notes: it may need the viewport reset (`resize_window` preset desktop); screenshots of the page are low-res, so judge art from the preview sheet and numbers from JS.
 
@@ -148,11 +148,11 @@ python tools/build.py
 What the converter does (`tools/art/make_companion.py`):
 1. Crops the transparent margin, scales to **height 84** (same as every tag; width follows the aspect ratio), drops the faint alpha fringe (`--alpha-cut`, default 64).
 2. Encodes a PNG data URI **at 256 colours** (near-lossless: mean colour error ~2.5/255 on our art, and ~3.7x smaller than full colour because resizing creates thousands of blended colours).
-   `--lossless` starts from full colour instead - use it for soft photographic art, or to keep a companion exactly as before (Roll was made with it and is deliberately unchanged).
+   `--lossless` starts from full colour instead - use it for soft photographic art, (Roll was originally lossless but is now 256 colours like the rest: visually near-identical, 21 KB -> 5.8 KB).
 3. **Budget**: `--max-chars` (default **60,000** characters for the companion alone). If the HTML is over budget it steps down 128 -> 64 -> 32 colours, and only then shrinks the height 8 px at a time (floor 32 px)
    and says so ("it will sit shorter than the tag"). If nothing fits it exits with an error instead of writing a bad file.
 4. Prints the result and the **projected worst case**: biggest existing tag + this companion as a percentage of gycra's 211,642-character tag, with a warning above 50%.
-   Typical results: Roll 21 KB (lossless, 97 px wide); a 141x84 illustration came out at 5.7 KB (256 colours). Anything that lands above ~60 KB should be simplified, not forced.
+   Typical results: Roll 5.8 KB (256 colours, 97 px wide; 21 KB when lossless); a 141x84 illustration came out at 5.7 KB (256 colours). Anything that lands above ~60 KB should be simplified, not forced.
 5. Writes `docs/tags/companions/<id>.html` and registers `{id, name, file, w, h, chars}` in `companions.json` (Roll is kept first). Re-running with the same `--id` replaces it.
 
 Then `python tools/build.py` (embeds it in the page, creates `docs/tags/with-<id>/`), test the dropdown, commit everything (including the new `with-<id>/` folder), push.
