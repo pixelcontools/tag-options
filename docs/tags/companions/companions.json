@@ -8,12 +8,68 @@
   "chars": 21255
  },
  {
+  "id": "aqua",
+  "name": "Aqua",
+  "file": "aqua.html",
+  "w": 80,
+  "h": 84,
+  "chars": 4331
+ },
+ {
+  "id": "fallenshadow",
+  "name": "fallenshadow",
+  "file": "fallenshadow.html",
+  "w": 62,
+  "h": 84,
+  "chars": 4523
+ },
+ {
+  "id": "gura",
+  "name": "gura",
+  "file": "gura.html",
+  "w": 86,
+  "h": 84,
+  "chars": 5779
+ },
+ {
+  "id": "kanna",
+  "name": "Kanna",
+  "file": "kanna.html",
+  "w": 67,
+  "h": 84,
+  "chars": 5015
+ },
+ {
+  "id": "koyuki",
+  "name": "Koyuki",
+  "file": "koyuki.html",
+  "w": 84,
+  "h": 84,
+  "chars": 6395
+ },
+ {
+  "id": "m200",
+  "name": "M200",
+  "file": "m200.html",
+  "w": 82,
+  "h": 84,
+  "chars": 4627
+ },
+ {
   "id": "malfoid",
   "name": "Malfoid",
   "file": "malfoid.html",
   "w": 61,
   "h": 84,
   "chars": 4759
+ },
+ {
+  "id": "megumin",
+  "name": "Megumin",
+  "file": "megumin.html",
+  "w": 142,
+  "h": 84,
+  "chars": 6260
  },
  {
   "id": "neptune",
@@ -30,6 +86,22 @@
   "w": 86,
   "h": 84,
   "chars": 5807
+ },
+ {
+  "id": "roxy",
+  "name": "Roxy",
+  "file": "roxy.html",
+  "w": 84,
+  "h": 84,
+  "chars": 5679
+ },
+ {
+  "id": "sunna",
+  "name": "Sunna",
+  "file": "sunna.html",
+  "w": 59,
+  "h": 84,
+  "chars": 9139
  },
  {
   "id": "taiga",
