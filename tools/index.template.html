@@ -49,7 +49,31 @@ body.hl-only .card:not(:hover) .stage *,body.hl-only .sec-head:not(:hover) .samp
 .acts{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:4px}
 .acts button{font-size:11px;padding:2px 8px;white-space:nowrap}
 .lab{min-height:84px}
-.lab b{font-size:14px}.lab span{color:var(--muted);font-size:12px;line-height:1.4}
+.lab b{font-size:14px}.lab .ds{color:var(--muted);font-size:12px;line-height:1.4}
+.lab .row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sz{font-size:11px;padding:1px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);white-space:nowrap;cursor:help}
+/* companion picker: the dropdown is a button that opens a grid of pictures */
+.cbtn{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:2px 10px 2px 4px;border-radius:9px}
+.cbtn:hover{border-color:#5865f2}
+.cbtn .th{width:32px;height:32px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:6px;background:rgba(128,128,128,.16)}
+.cbtn .th img{width:auto!important;height:auto!important;max-width:100%;max-height:100%;image-rendering:auto!important}
+#picker{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:16px}
+#picker.open{display:flex}
+#pdlg{background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:14px;width:min(760px,100%);max-height:calc(100vh - 32px);display:flex;flex-direction:column;overflow:hidden}
+#pdlg .hd{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 8px}
+#pdlg .hd b{font-size:16px}
+#px{border:0;font-size:22px;line-height:1;padding:0 6px}
+#pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));grid-auto-rows:116px;gap:10px;padding:6px 16px 10px;overflow:auto;flex:1 1 auto;min-height:0}
+#pnote{padding:0 16px 14px;font-size:12px;color:var(--muted)}
+.tile{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;
+  background:var(--bg);color:inherit;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:transform .12s,border-color .12s}
+.tile img{display:block;width:auto!important;height:auto!important;max-width:92%;max-height:92%;image-rendering:auto!important}
+.tile .x{font-size:30px;color:var(--muted)}
+.tile:hover,.tile:focus-visible{border-color:#5865f2;transform:translateY(-2px);outline:none}
+.tile.sel{border-color:#5865f2;box-shadow:inset 0 0 0 2px #5865f2}
+.tile .nm{position:absolute;left:0;right:0;bottom:0;padding:5px 6px;font-size:12px;font-weight:500;text-align:center;color:#fff;
+  background:rgba(8,8,14,.78);opacity:0;transform:translateY(6px);transition:opacity .12s,transform .12s;pointer-events:none}
+.tile:hover .nm,.tile:focus-visible .nm,.tile.sel .nm{opacity:1;transform:none}
 footer{max-width:1300px;margin:0 auto;padding:8px 16px 40px;color:var(--muted);font-size:12px}
 footer a{color:inherit}
 /* modal */
@@ -75,7 +99,7 @@ footer a{color:inherit}
   then paste it into your guild settings &rarr; <i>Tag</i> field.</p>
 </header>
 <div id="bar">
-  <div class="grp"><label class="sw" title="An image drawn to the right of every tag. Choose None for the tag alone."><span>Companion image</span> <select id="compSel"></select></label></div>
+  <div class="grp"><span>Companion image</span> <button type="button" class="cbtn" id="compBtn" title="Choose the image drawn to the right of every tag"></button></div>
   <div class="grp"><label class="sw" title="Adds a yellow heart on the left and a blue heart on the right of the scene tags (24-28)"><input type="checkbox" id="heartsToggle" checked> Extra hearts</label></div>
   <div class="grp"><label class="sw" title="When ticked, only the tag under your cursor (or open in the popup) animates"><input type="checkbox" id="hlToggle"> Animate highlighted</label></div>
   <div class="grp"><span>Background:</span>
@@ -92,10 +116,16 @@ footer a{color:inherit}
 <footer>Tags use only inline SVG animation and the site's own built-in pulse keyframes. No scripts. Source and tag files:
   <a href="https://github.com/pixelcontools/tag-options">github.com/pixelcontools/tag-options</a> (<code>docs/tags/</code>).</footer>
 
+<div id="picker"><div id="pdlg" role="dialog" aria-modal="true" aria-label="Choose a companion image">
+  <div class="hd"><b>Choose a companion image</b><button id="px" aria-label="Close">&times;</button></div>
+  <div id="pgrid"></div>
+  <div id="pnote">Hover a picture to see who it is. The chosen image is drawn to the right of every tag.</div>
+</div></div>
+
 <div id="modal"><div id="dlg" role="dialog" aria-modal="true">
   <div class="hd"><div><b id="mtitle"></b><span id="mdesc"></span></div><button id="x" aria-label="Close">&times;</button></div>
   <div id="big"></div>
-  <div id="mrow"><label class="sw"><span>Companion image</span> <select id="mcomp"></select></label>
+  <div id="mrow"><span class="sw"><span>Companion image</span> <button type="button" class="cbtn" id="mcompBtn" title="Choose the image drawn to the right of the tag"></button></span>
     <span id="mhwrap" style="display:flex;align-items:center;gap:8px"><label class="sw"><input type="checkbox" id="mhon"> Extra hearts</label></span></div>
   <textarea id="code" readonly spellcheck="false"></textarea>
   <div id="mfoot"><button id="copy">Copy HTML</button><button id="dl">Download .html</button><span id="mcount"></span></div>
@@ -117,11 +147,37 @@ const html = (t, comp) => withComp(tagHtml(t), comp);
 
 
 const $ = s => document.querySelector(s);
-const compSel = $('#compSel'), mcomp = $('#mcomp');
+const compBtn = $('#compBtn'), mcompBtn = $('#mcompBtn');
 let comp = compById('roll') ? 'roll' : '', current = null;     // '' = no companion image
-for (const sel of [compSel, mcomp]) {
-  sel.innerHTML = '<option value="">None</option>' + COMPS.map(c => '<option value="' + c.id + '">' + c.name + '</option>').join('');
-  sel.value = comp;
+const GYCRA = 211642;                       // characters in the largest tag known to be accepted by geopixels.net
+function renderCompButtons() {
+  const c = compById(comp);
+  for (const b of [compBtn, mcompBtn]) {
+    b.innerHTML = '<span class="th">' + (c ? c.html : '<span style="color:var(--muted)">&#10005;</span>') + '</span><span>' + (c ? c.name : 'None') + '</span><span aria-hidden="true">&#9662;</span>';
+  }
+}
+function buildPicker() {
+  const g = $('#pgrid'); g.innerHTML = '';
+  const add = (id, name, inner) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'tile' + (id === comp ? ' sel' : ''); b.title = name; b.setAttribute('aria-label', name);
+    b.innerHTML = inner + '<span class="nm"></span>'; b.querySelector('.nm').textContent = name;
+    b.onclick = () => { setComp(id); closePicker(); };
+    g.appendChild(b);
+  };
+  add('', 'None', '<span class="x">&#10005;</span>');
+  COMPS.forEach(c => add(c.id, c.name, c.html));
+}
+function openPicker() { buildPicker(); $('#picker').classList.add('open'); }
+function closePicker() { $('#picker').classList.remove('open'); }
+compBtn.onclick = openPicker; mcompBtn.onclick = openPicker;
+$('#px').onclick = closePicker;
+$('#picker').onclick = e => { if (e.target.id === 'picker') closePicker(); };
+// the size of a tag as it would be pasted (UTF-8 bytes), with its share of the largest known-accepted tag as a tooltip
+function sizeOf(t) {
+  const h = html(t, comp), bytes = new TextEncoder().encode(h).length;
+  return { kb: (bytes / 1024).toFixed(1) + ' KB', chars: h.length,
+           tip: h.length.toLocaleString() + ' characters \u00b7 ' + (h.length / GYCRA * 100).toFixed(1) + '% of the largest tag known to be accepted (' + GYCRA.toLocaleString() + ' characters)' };
 }
 
 function mount(host, markup, maxW) {
@@ -165,9 +221,10 @@ function renderCards(sec, animate) {
   if (!isOpen[sec.id]) return;
   TAGS.filter(sec.match).forEach((t, i) => {
     const c = document.createElement('div'); c.className = 'card';
-    c.innerHTML = '<div class="stage"></div><div class="lab"><b>' + t.label + '</b><span></span></div>' +
+    c.innerHTML = '<div class="stage"></div><div class="lab"><div class="row"><b>' + t.label + '</b><span class="sz"></span></div><span class="ds"></span></div>' +
       '<div class="acts">' + '<button class="cc">Copy HTML</button><button class="cd">Download</button></div>';
-    c.querySelector('span').textContent = t.desc;
+    c.querySelector('.ds').textContent = t.desc;
+    const si = sizeOf(t); c.querySelector('.sz').textContent = si.kb; c.querySelector('.sz').title = si.tip;
     grid.appendChild(c);
     if (animate) {                          // only when the section is opened; never on close or on a toggle re-render
       c.style.animation = 'cardIn .5s ease-out backwards';
@@ -204,7 +261,7 @@ SECTIONS.forEach(sec => {
   sec.head.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sec.head.click(); } };
 });
 function openModal(t) {
-  current = t; mcomp.value = comp;
+  current = t;
   $('#mhwrap').style.display = t.levels ? '' : 'none';
   $('#mhon').checked = hearts;
   $('#mtitle').textContent = t.label; $('#mdesc').textContent = t.desc;
@@ -213,22 +270,23 @@ function openModal(t) {
 function refreshModal() {
   const h = html(current, comp);
   mount($('#big'), h, $('#big').clientWidth);
-  $('#code').value = h; $('#mcount').textContent = h.length.toLocaleString() + ' characters';
+  $('#code').value = h; $('#mcount').textContent = (new TextEncoder().encode(h).length / 1024).toFixed(1) + ' KB \u00b7 ' + h.length.toLocaleString() + ' characters';
   $('#copy').textContent = 'Copy HTML'; $('#copy').dataset.label = '';
 }
 const close = () => $('#modal').classList.remove('open');
 $('#x').onclick = close;
 $('#modal').onclick = e => { if (e.target.id === 'modal') close(); };
-document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-// One shared setting: the top dropdown and the popup dropdown always agree, so the code you copy matches the preview.
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('#picker').classList.contains('open')) closePicker(); else close();
+});
+// One shared setting: the top button and the popup button always agree, so the code you copy matches the preview.
 function setComp(id) {
-  comp = id; compSel.value = id; mcomp.value = id;
+  comp = id; renderCompButtons();
   renderGrid();
   if (current && $('#modal').classList.contains('open')) refreshModal();
 }
-compSel.onchange = () => setComp(compSel.value);
-mcomp.onchange = () => setComp(mcomp.value);
-// One shared hearts switch, mirrored in the top bar and the popup (same idea as the companion dropdown).
+// One shared hearts switch, mirrored in the top bar and the popup (same idea as the companion picker).
 function setHearts(v) {
   hearts = v; $('#heartsToggle').checked = v; $('#mhon').checked = v;
   renderGrid();
@@ -266,6 +324,7 @@ document.querySelectorAll('[data-bg]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-bg]').forEach(x => x.classList.toggle('on', x === b));
 });
 window.addEventListener('resize', renderGrid);
+renderCompButtons();
 renderGrid();
 </script>
 </body>

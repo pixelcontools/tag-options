@@ -40,6 +40,14 @@
   "chars": 5015
  },
  {
+  "id": "komekko",
+  "name": "Komekko",
+  "file": "komekko.html",
+  "w": 79,
+  "h": 84,
+  "chars": 3887
+ },
+ {
   "id": "koyuki",
   "name": "Koyuki",
   "file": "koyuki.html",
