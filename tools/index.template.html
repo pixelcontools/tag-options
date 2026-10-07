@@ -142,9 +142,10 @@ footer a{color:inherit}
 const TAGS = @@TAGS@@;
 const COMPS = @@COMPS@@;                 // companion images: [{id, name, w, h, html}], from docs/tags/companions/
 const compById = id => COMPS.find(c => c.id === id);
+const WRAP = 'display: flex; flex-wrap: wrap; justify-content: center; align-items: center; max-width: calc(100vw - 56px)', PLAIN_ROW = 'display: inline-flex; align-items: center';
 const withComp = (h, id) => {
   const c = compById(id);
-  return c ? '<div style="display: inline-flex; align-items: center">' + h +
+  return c ? '<div style="' + WRAP + '">' + h +
     '<span style="position: relative; display: inline-block; width: ' + c.w + 'px; height: ' + c.h + 'px">' + c.html + '</span></div>' : h;
 };
 let hearts = 'few';                      // global setting: none / few / all animated hearts on every new-style tag
@@ -190,7 +191,11 @@ function sizeOf(t) {
 
 // sizeAs: markup whose width decides the scale. Passing the 'few' version keeps a tag the same size on screen whatever the hearts
 // setting is (without it the narrower no-hearts classic tags were scaled down less and looked bigger).
+// Pasted tags with a companion wrap it under the banner when the site's panel is narrower than the tag (calc(100vw - 56px) is about the
+// width of the panel on a phone). The gallery previews scale to fit instead, so they show the one-line version.
+const unwrap = m => m && m.split(WRAP).join(PLAIN_ROW);
 function mount(host, markup, maxW, sizeAs) {
+  markup = unwrap(markup); sizeAs = unwrap(sizeAs);
   host.innerHTML = '<div class="fit">' + (sizeAs || markup) + '</div>';
   const fit = host.firstChild;
   const avail = (maxW || host.clientWidth) - 24, w = fit.offsetWidth || 1;
