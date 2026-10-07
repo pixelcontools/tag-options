@@ -8,6 +8,14 @@
   "chars": 21255
  },
  {
+  "id": "malfoid",
+  "name": "Malfoid",
+  "file": "malfoid.html",
+  "w": 61,
+  "h": 84,
+  "chars": 4759
+ },
+ {
   "id": "neptune",
   "name": "Neptune",
   "file": "neptune.html",
