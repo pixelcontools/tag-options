@@ -8,6 +8,14 @@
   "chars": 21255
  },
  {
+  "id": "neptune",
+  "name": "Neptune",
+  "file": "neptune.html",
+  "w": 56,
+  "h": 84,
+  "chars": 4187
+ },
+ {
   "id": "taiga",
   "name": "Taiga",
   "file": "taiga.html",
