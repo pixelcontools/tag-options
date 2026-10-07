@@ -98,7 +98,8 @@ footer a{color:inherit}
 #vrow{display:flex;align-items:center;gap:6px;padding:0 16px 8px;font-size:13px;flex:none}
 #vrow>span{margin-right:4px;color:var(--muted)}
 #prof{display:none;margin:0 16px;flex:1 1 430px;min-height:180px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
-#pframe{display:block;margin:0 auto;border:0;height:560px;width:412px;background:#dbe8cf}
+#pframe{display:block;margin:0 auto;border:0;height:760px;width:412px;background:#dbe8cf}
+#pwnote{flex-basis:100%;color:var(--muted);font-size:12px;line-height:1.4}
 #pctl{display:none;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:8px 16px 0;font-size:13px;flex:none}
 #pctl input[type=range]{flex:1 1 140px;min-width:120px;max-width:300px}
 #pctl .wl{color:var(--muted);font-size:12px}
@@ -149,7 +150,7 @@ footer a{color:inherit}
   <div id="big"></div>
   <div id="prof"><iframe id="pframe" title="GeoPixels profile panel preview" referrerpolicy="no-referrer"></iframe></div>
   <div id="pctl"><span>Screen width</span><span class="wl">Narrow</span><input type="range" id="pw" min="320" max="700" step="1" value="412" aria-label="Simulated screen width"><span class="wl">Wide</span><b id="pwv">412 px</b>
-    <button type="button" data-w="360">360</button><button type="button" data-w="412">412</button><button type="button" data-w="490">490</button><button type="button" data-w="700">Desktop</button></div>
+    <button type="button" data-w="360">360</button><button type="button" data-w="412">412</button><button type="button" data-w="490">490</button><button type="button" id="pdesk">Desktop</button><span id="pwnote"></span></div>
   <div id="mrow"><span class="sw"><span>Companion image</span> <button type="button" class="cbtn" id="mcompBtn" title="Choose the image drawn to the right of the tag"></button></span>
     <span id="mhwrap" style="display:flex;align-items:center;gap:8px"><label class="sw"><span>Animated hearts</span> <select id="mheartsSel"><option value="none">None</option><option value="few">Few</option><option value="all">All</option></select></label></span></div>
   <textarea id="code" readonly spellcheck="false"></textarea>
@@ -320,7 +321,7 @@ function refreshModal() {
   $('#copy').textContent = 'Copy HTML'; $('#copy').dataset.label = '';
 }
 // ---- "User profile" view: the tag inside a copy of the geopixels.net hover panel, at a chosen screen width
-let pv = false, pReady = false;
+let pv = false, pReady = false, desk = false;
 function postTag() {
   if (!pv || !pReady || !current) return;
   $('#pframe').contentWindow.postMessage({ type: 'tag', html: html(current, comp) }, '*');       // the same text the Copy button gives
@@ -337,9 +338,23 @@ function revealTag() {           // scroll the preview so the tag is in view (ne
 window.addEventListener('message', e => {
   if (e.data && e.data.type === 'ready' && e.source === $('#pframe').contentWindow) { pReady = true; postTag(); }
 });
+// The site switches layout on the screen's orientation (its `portrait:` rules). The preview keeps the two cases explicit instead of
+// flipping at some width: a phone/tablet in PORTRAIT (panel = 95% of the screen width, any width from the slider) or a DESKTOP/LANDSCAPE
+// window (panel is a fixed 384 px at the left, so a tag wider than that hangs out over the map; nothing can wrap it).
 function setWidth(w) {
   w = Math.max(320, Math.min(700, Math.round(w)));
-  $('#pw').value = w; $('#pwv').textContent = w + ' px'; $('#pframe').style.width = w + 'px'; if (pv && pReady) revealTag();
+  desk = false;
+  const f = $('#pframe'); f.style.height = '760px'; f.style.width = w + 'px';
+  $('#pw').value = w; $('#pwv').textContent = w + ' px'; $('#pdesk').classList.remove('on');
+  $('#pwnote').textContent = 'Portrait screen: the panel is 95% of the width (' + Math.round(w * 0.95) + ' px). A tag wider than the panel wraps its companion image under the banner.';
+  if (pv && pReady) revealTag();
+}
+function setDesktop() {
+  desk = true;
+  const f = $('#pframe'); f.style.height = '420px'; f.style.width = '700px';
+  $('#pw').value = 700; $('#pwv').textContent = 'Desktop'; $('#pdesk').classList.add('on');
+  $('#pwnote').textContent = 'Landscape / desktop: geopixels.net shows the panel at a fixed 384 px wide on the left, so a tag wider than that hangs out over the map (it is not cut, and it cannot wrap).';
+  if (pv && pReady) revealTag();
 }
 function setView(on) {
   pv = on;
@@ -348,7 +363,7 @@ function setView(on) {
   if (on) {
     const f = $('#pframe');
     if (!f.getAttribute('src')) { pReady = false; f.src = 'profile-preview.html'; }           // loaded on first use
-    setWidth($('#pw').value);
+    if (desk) setDesktop(); else setWidth($('#pw').value);
     postTag();
   } else if (current) refreshModal();
 }
@@ -356,6 +371,7 @@ $('#vTag').onclick = () => setView(false);
 $('#vProf').onclick = () => setView(true);
 $('#pw').oninput = e => setWidth(e.target.value);
 document.querySelectorAll('#pctl button[data-w]').forEach(b => { b.onclick = () => setWidth(b.dataset.w); });
+$('#pdesk').onclick = setDesktop;
 const close = () => $('#modal').classList.remove('open');
 $('#x').onclick = close;
 $('#modal').onclick = e => { if (e.target.id === 'modal') close(); };
