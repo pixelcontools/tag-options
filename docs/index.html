@@ -116,6 +116,9 @@ footer a{color:inherit}
   <section class="sec" id="sec-new"><div class="sec-head" role="button" tabindex="0" aria-expanded="false" aria-controls="sec-new-body">
     <div class="sec-title"><b>New tag styles</b><span></span></div><div class="samp"></div><div class="chev" aria-hidden="true">&#9656;</div></div>
     <div class="sec-body" id="sec-new-body"><div class="grid"></div></div></section>
+  <section class="sec" id="sec-holiday"><div class="sec-head" role="button" tabindex="0" aria-expanded="false" aria-controls="sec-holiday-body">
+    <div class="sec-title"><b>Holiday styles</b><span></span></div><div class="samp"></div><div class="chev" aria-hidden="true">&#9656;</div></div>
+    <div class="sec-body" id="sec-holiday-body"><div class="grid"></div></div></section>
 </div>
 <footer>Tags use only inline SVG animation and the site's own built-in pulse keyframes. No scripts. Source and tag files:
   <a href="https://github.com/pixelcontools/tag-options">github.com/pixelcontools/tag-options</a> (<code>docs/tags/</code>).</footer>
@@ -206,13 +209,16 @@ function applyHighlightMode() {
 /* Two collapsible sections. Classic = options 0-21, New = 22 and up. A section only builds its cards while it is open. */
 const SECTIONS = [
   { id: 'classic', title: 'Classic tag styles', sample: 0, match: t => t.n < 22 },
-  { id: 'new', title: 'New tag styles', sample: 22, match: t => t.n >= 22 },
+  { id: 'new', title: 'New tag styles', sample: 22, match: t => t.n >= 22 && t.n < 100 },
+  { id: 'holiday', title: 'Holiday styles', sample: null, match: t => t.n >= 100 },    // holiday tags are numbered from 100 so new styles can keep counting from 30
 ];
 const isOpen = {};
 const STAGGER = 0.07;                       // seconds between one card sliding in and the next
 
 function renderSample(sec) {
-  const head = sec.head, host = head.querySelector('.samp'), t = TAGS.find(x => x.n === sec.sample) || TAGS[0];
+  const head = sec.head, host = head.querySelector('.samp');
+  const t = TAGS.find(x => x.n === sec.sample) || TAGS.filter(sec.match)[0];      // no sample set: the section's first tag
+  if (!t) { host.innerHTML = '<span style="color:var(--muted);font-size:13px">Coming soon</span>'; return; }      // empty section
   head._rest = REST[t.n] || REST_DEFAULT;
   const maxW = head.clientWidth < 640 ? head.clientWidth - 40 : Math.min(head.clientWidth * 0.5, 560);
   mount(host, html(t, comp), maxW);
@@ -223,6 +229,7 @@ function renderCards(sec, animate) {
   const grid = sec.el.querySelector('.grid');
   grid.innerHTML = '';
   if (!isOpen[sec.id]) return;
+  if (!TAGS.some(sec.match)) { grid.innerHTML = '<p style="grid-column:1/-1;margin:6px 0;color:var(--muted);font-size:13px">Nothing here yet: holiday tags are being designed.</p>'; return; }
   TAGS.filter(sec.match).forEach((t, i) => {
     const c = document.createElement('div'); c.className = 'card';
     c.innerHTML = '<div class="stage"></div><div class="lab"><div class="row"><b>' + t.label + '</b><span class="sz"></span></div><span class="ds"></span></div>' +
@@ -266,7 +273,7 @@ SECTIONS.forEach(sec => {
   sec.el = document.getElementById('sec-' + sec.id);
   sec.head = sec.el.querySelector('.sec-head');
   const n = TAGS.filter(sec.match).length;
-  const hint = () => n + ' option' + (n === 1 ? '' : 's') + ' · <b>' + (isOpen[sec.id] ? 'Click to collapse' : 'Click to expand') + '</b>';
+  const hint = () => (n ? n + ' option' + (n === 1 ? '' : 's') : 'No options yet') + ' · <b>' + (isOpen[sec.id] ? 'Click to collapse' : 'Click to expand') + '</b>';
   sec.el.querySelector('.sec-title span').innerHTML = hint();
   sec.head.onclick = () => { toggleSection(sec); sec.el.querySelector('.sec-title span').innerHTML = hint(); };
   sec.head.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sec.head.click(); } };
