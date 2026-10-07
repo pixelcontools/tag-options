@@ -69,6 +69,9 @@ body.hl-only .card:not(:hover) .stage *,body.hl-only .sec-head:not(:hover) .samp
 #px{border:0;font-size:22px;line-height:1;padding:0 6px}
 #pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));grid-auto-rows:116px;gap:10px;padding:6px 16px 10px;overflow:auto;flex:1 1 auto;min-height:0}
 #pnote{padding:0 16px 14px;font-size:12px;color:var(--muted)}
+#pbar{display:flex;align-items:center;gap:8px;padding:2px 16px 10px;flex:none}
+#pname{flex:1;min-width:0;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#pok{background:#5865f2;border-color:#5865f2;color:#fff;font-weight:500;padding:6px 22px}
 .tile{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:0;
   background:var(--bg);color:inherit;border:1px solid var(--line);border-radius:12px;cursor:pointer;transition:transform .12s,border-color .12s}
 .tile img{display:block;width:auto!important;height:auto!important;max-width:92%;max-height:92%;image-rendering:auto!important}
@@ -141,7 +144,8 @@ footer a{color:inherit}
 <div id="picker"><div id="pdlg" role="dialog" aria-modal="true" aria-label="Choose a companion image">
   <div class="hd"><b>Choose a companion image</b><button id="px" aria-label="Close">&times;</button></div>
   <div id="pgrid"></div>
-  <div id="pnote">Hover a picture to see who it is. The chosen image is drawn to the right of every tag.</div>
+  <div id="pbar"><span id="pname" aria-live="polite"></span><button type="button" id="pcancel">Cancel</button><button type="button" id="pok">OK</button></div>
+  <div id="pnote">Tap or hover a picture to see who it is, then press OK. The chosen image is drawn to the right of every tag.</div>
 </div></div>
 
 <div id="modal"><div id="dlg" role="dialog" aria-modal="true">
@@ -188,13 +192,20 @@ function buildPicker() {
   const g = $('#pgrid'); g.innerHTML = '';
   const add = (id, name, inner) => {
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'tile' + (id === comp ? ' sel' : ''); b.title = name; b.setAttribute('aria-label', name);
+    b.type = 'button'; b.className = 'tile' + (id === pending ? ' sel' : ''); b.title = name; b.setAttribute('aria-label', name); b.dataset.id = id;
     b.innerHTML = inner + '<span class="nm"></span>'; b.querySelector('.nm').textContent = name;
-    b.onclick = () => { setComp(id); closePicker(); };
+    b.onclick = () => selectTile(id);          // only highlights; the choice is applied by OK (so touch users can read the name first)
     g.appendChild(b);
   };
   add('', 'None', '<span class="x">&#10005;</span>');
   COMPS.forEach(c => add(c.id, c.name, c.html));
+}
+let pending = null;                         // the highlighted tile in the picker; applied by OK
+function nameOf(id) { const c = compById(id); return c ? c.name : 'None'; }
+function selectTile(id) {
+  pending = id;
+  document.querySelectorAll('#pgrid .tile').forEach(t => t.classList.toggle('sel', t.dataset.id === id));
+  $('#pname').textContent = 'Selected: ' + nameOf(id);
 }
 const PICK_NOTE = $('#pnote').textContent;
 // The companion choice is remembered in this browser; having no saved choice means this is a first visit, so the picker opens by itself.
@@ -202,13 +213,17 @@ const STORE = 'pixelcons-tag-options';
 function loadChoice() { try { const v = JSON.parse(localStorage.getItem(STORE) || 'null'); return v && typeof v.comp === 'string' ? v : null; } catch (_) { return null; } }
 function saveChoice() { try { localStorage.setItem(STORE, JSON.stringify({ comp })); } catch (_) {} }
 function openPicker(first) {
+  pending = comp;
   buildPicker();
-  $('#pnote').textContent = first === true ? 'Welcome! Pick the image shown next to every tag. Roll is selected, so just close this if you like her. You can change it any time with the Companion image button at the top.' : PICK_NOTE;
+  $('#pname').textContent = 'Selected: ' + nameOf(pending);
+  $('#pnote').textContent = first === true ? 'Welcome! Pick the image shown next to every tag and press OK. Roll is selected, so just press OK if you like her. You can change it any time with the Companion image button at the top.' : PICK_NOTE;
   $('#picker').classList.add('open');
 }
 function closePicker() { $('#picker').classList.remove('open'); saveChoice(); }
 compBtn.onclick = () => openPicker(); mcompBtn.onclick = () => openPicker();
-$('#px').onclick = closePicker;
+$('#px').onclick = closePicker;                       // X, Cancel, clicking outside and Escape all leave the current choice unchanged
+$('#pcancel').onclick = closePicker;
+$('#pok').onclick = () => { if (pending !== null) setComp(pending); closePicker(); };
 $('#picker').onclick = e => { if (e.target.id === 'picker') closePicker(); };
 // the size of a tag as it would be pasted (UTF-8 bytes), with its share of the largest known-accepted tag as a tooltip
 function sizeOf(t) {
