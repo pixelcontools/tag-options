@@ -102,6 +102,9 @@ def main():
     if height != a.height:
         print(f'  note: shrunk from {a.height} to {height} px to fit the budget; it will sit shorter than the tag')
     print(f'  biggest tag today {biggest:,} + this companion = about {total:,} chars = {total / GYCRA:.0%} of the largest known-accepted tag ({GYCRA:,})')
+    if w > 110:
+        print(f'  WARNING: {w} px wide. Roll is 97 px wide and a 141 px companion was rejected as too wide; '
+              'prefer a compact, simple subject (about 100 px wide or less) or crop it')
     if total > GYCRA * 0.5:
         print('  WARNING: above half of the largest tag known to be accepted; shrink it (lower --max-chars) or simplify the art')
     if a.preview:
