@@ -3,79 +3,131 @@
   "n": 0,
   "name": "Current tag",
   "desc": "The tag as it is today: the letters pulse and drift a little.",
-  "file": "00_current_tag.html"
+  "levels": {
+   "all": "00_current_tag_hearts_all.html",
+   "few": "00_current_tag_hearts_few.html",
+   "none": "00_current_tag_hearts_none.html"
+  }
  },
  {
   "n": 1,
   "name": "Calm",
   "desc": "Text stays perfectly still; only the hearts and colour blobs pulse (original, minus the text shift).",
-  "file": "01_calm.html"
+  "levels": {
+   "all": "01_calm_hearts_all.html",
+   "few": "01_calm_hearts_few.html",
+   "none": "01_calm_hearts_none.html"
+  }
  },
  {
   "n": 2,
   "name": "Sonar ripple",
   "desc": "Two white rings expand outward from the badge and fade, like a sonar ping. Text is still.",
-  "file": "02_sonar_ripple.html"
+  "levels": {
+   "all": "02_sonar_ripple_hearts_all.html",
+   "few": "02_sonar_ripple_hearts_few.html",
+   "none": "02_sonar_ripple_hearts_none.html"
+  }
  },
  {
   "n": 5,
   "name": "Shimmer",
   "desc": "A bright highlight sweeps across the letters, then rests.",
-  "file": "05_shimmer.html"
+  "levels": {
+   "all": "05_shimmer_hearts_all.html",
+   "few": "05_shimmer_hearts_few.html",
+   "none": "05_shimmer_hearts_none.html"
+  }
  },
  {
   "n": 7,
   "name": "Letter wave",
   "desc": "Letters hop up one after another in a quick wave, then pause.",
-  "file": "07_letter_wave.html"
+  "levels": {
+   "all": "07_letter_wave_hearts_all.html",
+   "few": "07_letter_wave_hearts_few.html",
+   "none": "07_letter_wave_hearts_none.html"
+  }
  },
  {
   "n": 9,
   "name": "Neon flicker",
   "desc": "The whole word flickers like a neon sign every few seconds.",
-  "file": "09_neon_flicker.html"
+  "levels": {
+   "all": "09_neon_flicker_hearts_all.html",
+   "few": "09_neon_flicker_hearts_few.html",
+   "none": "09_neon_flicker_hearts_none.html"
+  }
  },
  {
   "n": 10,
   "name": "Glow breathing",
   "desc": "The glow around the letters slowly swells and shrinks; letters themselves never move.",
-  "file": "10_glow_breathing.html"
+  "levels": {
+   "all": "10_glow_breathing_hearts_all.html",
+   "few": "10_glow_breathing_hearts_few.html",
+   "none": "10_glow_breathing_hearts_none.html"
+  }
  },
  {
   "n": 11,
   "name": "Gloss streak",
   "desc": "A glossy diagonal streak glides across the whole badge, like polished glass.",
-  "file": "11_gloss_streak.html"
+  "levels": {
+   "all": "11_gloss_streak_hearts_all.html",
+   "few": "11_gloss_streak_hearts_few.html",
+   "none": "11_gloss_streak_hearts_none.html"
+  }
  },
  {
   "n": 14,
   "name": "Border chase",
   "desc": "A bright dash of light runs around the badge border, forever circling.",
-  "file": "14_border_chase.html"
+  "levels": {
+   "all": "14_border_chase_hearts_all.html",
+   "few": "14_border_chase_hearts_few.html",
+   "none": "14_border_chase_hearts_none.html"
+  }
  },
  {
   "n": 15,
   "name": "Star twinkle",
   "desc": "Four-point stars blink on and off across the badge at staggered times.",
-  "file": "15_star_twinkle.html"
+  "levels": {
+   "all": "15_star_twinkle_hearts_all.html",
+   "few": "15_star_twinkle_hearts_few.html",
+   "none": "15_star_twinkle_hearts_none.html"
+  }
  },
  {
   "n": 16,
   "name": "Pop",
   "desc": "Each letter pops bigger for a moment in sequence, like a bouncing lyric.",
-  "file": "16_pop.html"
+  "levels": {
+   "all": "16_pop_hearts_all.html",
+   "few": "16_pop_hearts_few.html",
+   "none": "16_pop_hearts_none.html"
+  }
  },
  {
   "n": 19,
   "name": "Marquee flash",
   "desc": "Each letter lights up white for an instant in turn, like theatre marquee bulbs.",
-  "file": "19_marquee_flash.html"
+  "levels": {
+   "all": "19_marquee_flash_hearts_all.html",
+   "few": "19_marquee_flash_hearts_few.html",
+   "none": "19_marquee_flash_hearts_none.html"
+  }
  },
  {
   "n": 21,
   "name": "Spotlight",
   "desc": "A soft round spotlight drifts back and forth over the letters, lighting them white as it passes.",
-  "file": "21_spotlight.html"
+  "levels": {
+   "all": "21_spotlight_hearts_all.html",
+   "few": "21_spotlight_hearts_few.html",
+   "none": "21_spotlight_hearts_none.html"
+  }
  },
  {
   "n": 22,
