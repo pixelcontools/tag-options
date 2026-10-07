@@ -196,9 +196,18 @@ function buildPicker() {
   add('', 'None', '<span class="x">&#10005;</span>');
   COMPS.forEach(c => add(c.id, c.name, c.html));
 }
-function openPicker() { buildPicker(); $('#picker').classList.add('open'); }
-function closePicker() { $('#picker').classList.remove('open'); }
-compBtn.onclick = openPicker; mcompBtn.onclick = openPicker;
+const PICK_NOTE = $('#pnote').textContent;
+// The companion choice is remembered in this browser; having no saved choice means this is a first visit, so the picker opens by itself.
+const STORE = 'pixelcons-tag-options';
+function loadChoice() { try { const v = JSON.parse(localStorage.getItem(STORE) || 'null'); return v && typeof v.comp === 'string' ? v : null; } catch (_) { return null; } }
+function saveChoice() { try { localStorage.setItem(STORE, JSON.stringify({ comp })); } catch (_) {} }
+function openPicker(first) {
+  buildPicker();
+  $('#pnote').textContent = first === true ? 'Welcome! Pick the image shown next to every tag. Roll is selected, so just close this if you like her. You can change it any time with the Companion image button at the top.' : PICK_NOTE;
+  $('#picker').classList.add('open');
+}
+function closePicker() { $('#picker').classList.remove('open'); saveChoice(); }
+compBtn.onclick = () => openPicker(); mcompBtn.onclick = () => openPicker();
 $('#px').onclick = closePicker;
 $('#picker').onclick = e => { if (e.target.id === 'picker') closePicker(); };
 // the size of a tag as it would be pasted (UTF-8 bytes), with its share of the largest known-accepted tag as a tooltip
@@ -382,7 +391,7 @@ document.addEventListener('keydown', e => {
 });
 // One shared setting: the top button and the popup button always agree, so the code you copy matches the preview.
 function setComp(id) {
-  comp = id; renderCompButtons();
+  comp = id; saveChoice(); renderCompButtons();
   renderGrid();
   if (current && $('#modal').classList.contains('open')) refreshModal();
 }
@@ -425,8 +434,11 @@ document.querySelectorAll('[data-bg]').forEach(b => b.onclick = () => {
 });
 window.addEventListener('resize', renderGrid);
 $('#heartsSel').value = hearts;
+const saved = loadChoice();
+if (saved && (saved.comp === '' || compById(saved.comp))) comp = saved.comp;      // returning visitor: keep their choice (Roll is only the default)
 renderCompButtons();
 renderGrid();
+if (!saved) setTimeout(() => openPicker(true), 400);                               // first visit: let them choose a companion
 </script>
 </body>
 </html>
