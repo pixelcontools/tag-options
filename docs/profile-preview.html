@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoPixels profile panel preview</title>
+<!--
+  A faithful copy of the hover/profile panel (#hoverInfo) from geopixels.net, shown the way showPixelUser() leaves it, filled with
+  AriaPokoteng's public profile (GetUserProfile 3228). Styling is the site's own compiled Tailwind stylesheet (assets/geopixels-output.css,
+  copied from https://geopixels.net/css/output.css), so the panel width, wrapping and `portrait:` rules behave like the real page: this
+  document is meant to be shown inside an <iframe> whose width is the "phone width" you want to simulate.
+  The gallery (index.html) sends the tag to show with postMessage({type:'tag', html}).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css" rel="stylesheet">   <!-- provides the pulse keyframes the tags use -->
+<link href="assets/geopixels-output.css" rel="stylesheet">
+<style>
+  body { font-family: 'Noto Sans', sans-serif; margin: 0; overflow: hidden; background: #dbe8cf; }
+  .pixel-perfect { image-rendering: -moz-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: pixelated; -ms-interpolation-mode: nearest-neighbor; }
+  /* a few faint "pixels" so the panel sits on something map-like */
+  #map { position: absolute; inset: 0; background:
+      linear-gradient(#bcd4a8 0 0) 12% 78% / 28px 28px no-repeat, linear-gradient(#a9bffa 0 0) 70% 86% / 28px 28px no-repeat,
+      linear-gradient(#e9c9a5 0 0) 40% 92% / 28px 28px no-repeat, #dbe8cf; }
+</style>
+</head>
+<body class="font-sans h-screen w-screen relative">
+<div id="map"></div>
+<div id="hoverInfo"
+         class="absolute top-16 left-4 bg-white rounded-xl shadow-lg p-4 w-96 transform transition-all duration-50 opacity-100 scale-100
+        portrait:left-1/2 portrait:-translate-x-1/2 portrait:w-[95%] z-10">
+
+        <!-- Top row: Pin / Badges / Report -->
+        <div class="grid grid-cols-3 items-center mb-3 relative z-30">
+            <div class="justify-self-start bg-white/80 rounded-md px-1">
+                <button id="favoriteBtn" onclick="toggleFavorite()" class="text-gray-400 hover:text-red-500 cursor-pointer text-2xl" title="Favorite Location">📍</button>
+            </div>
+
+            <div id="userBadges" class="flex items-center gap-1 justify-self-center flex-wrap px-1">
+            </div>
+
+            <div class="justify-self-end bg-white/80 rounded-md px-1">
+                <button id="buttonReport" class="text-red-500 hover:text-red-700 cursor-pointer text-2xl" title="Report" onclick="openReportForm()">🚩</button>
+            </div>
+        </div>
+
+        <!-- Second row: Profile and Banner Image -->
+        <div id="hoverVisuals" class="flex w-[calc(100%+2rem)] -mt-2 -mx-4 mb-4 overflow-hidden bg-gray-200 relative z-0">
+
+            <div class="w-1/3 aspect-square relative bg-white">
+                <img id="hoverProfileImg"
+                     alt="Profile"
+                     class="w-full h-full object-cover hidden pixel-perfect">
+            </div>
+
+            <div class="w-2/3 aspect-[2/1] relative bg-white">
+                <img id="hoverBannerImg"
+                     alt="Banner"
+                     class="w-full h-full object-cover hidden pixel-perfect">
+            </div>
+        </div>
+
+
+        <!-- Third row: Username + Guild Tag -->
+        <div class="flex flex-wrap items-center justify-start gap-2 min-w-0 relative z-20">
+            <h2 id="pixelUser" class="font-semibold text-gray-800 truncate z-30 relative bg-white/80 px-1 rounded-md">
+            </h2>
+            <div id="guildTagContainer" class="relative z-0 pointer-events-none overflow-visible flex-shrink-0">
+            </div>
+        </div>
+
+        <!-- Socials + Level -->
+        <div id="socialsContainer" class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-700 mt-3 hidden relative z-30 px-2 py-1">
+            <span id="pixelUserLevel" class="hidden text-sm font-bold text-blue-600 bg-blue-100/80 px-1.5 py-0.5 rounded-full w-fit bg-white/80 rounded-md"></span>
+
+            <p id="xUserContainer" class="hidden truncate bg-white/80 rounded-md"><span class="font-medium">X:</span> <span id="pixelUserX"></span></p>
+            <p id="redditUserContainer" class="hidden truncate bg-white/80 rounded-md"><span class="font-medium">Reddit:</span> <span id="pixelUserReddit"></span></p>
+            <p id="discordUserContainer" class="hidden truncate bg-white/80 rounded-md"><span class="font-medium">Discord:</span> <span id="pixelUserDiscord"></span></p>
+        </div>
+
+        <!-- Pixel Key -->
+        <div class="text-center mt-3 relative z-30 bg-white/80 rounded-md inline-block px-2 py-1">
+            <span id="pixelKey" class="text-xs text-gray-500 font-mono"></span>
+        </div>
+
+        <!-- Share Button -->
+        <div class="mt-3 relative z-30 bg-white/80 rounded-lg">
+            <button id="shareLocationBtn" onclick="sharePixelLocation()" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                Share Location
+            </button>
+        </div>
+    </div>
+<script>
+  // the user shown in the panel: AriaPokoteng#3228 (public GetUserProfile fields); the guild tag is replaced by whatever the gallery sends
+  var USER = { id: 3228, name: 'AriaPokoteng', level: 445, xUser: 'Lolimancer', redditUser: 'Cunnyseur', discordUser: 'ariapokoteng_',
+               profileLevel: 5, bannersLevel: 5, moderator: false, isGuildOwner: false, punishmentState: null };
+  var KEY = '106104,195284';
+  var $ = function (id) { return document.getElementById(id); };
+
+  // same steps as showPixelUser() on geopixels.net
+  $('pixelUser').textContent = USER.name + '#' + USER.id;
+  var lvl = $('pixelUserLevel'); lvl.textContent = 'Lvl ' + (USER.level + 1); lvl.classList.remove('hidden');
+  $('socialsContainer').classList.remove('hidden');
+  $('pixelKey').textContent = KEY;
+  if (USER.profileLevel > 0 || USER.bannersLevel > 0) {
+    $('hoverVisuals').classList.remove('hidden');
+    var pfp = $('hoverProfileImg'), ban = $('hoverBannerImg');
+    pfp.onload = function () { pfp.classList.remove('hidden'); }; pfp.src = 'assets/aria-pfp.png';
+    ban.onload = function () { ban.classList.remove('hidden'); }; ban.src = 'assets/aria-banner.png';
+  }
+  if (USER.xUser) { $('pixelUserX').textContent = USER.xUser; $('xUserContainer').classList.remove('hidden'); }
+  if (USER.redditUser) { $('pixelUserReddit').textContent = USER.redditUser; $('redditUserContainer').classList.remove('hidden'); }
+  if (USER.discordUser) { $('pixelUserDiscord').textContent = USER.discordUser; $('discordUserContainer').classList.remove('hidden'); }
+
+  window.addEventListener('message', function (e) {
+    var m = e.data;
+    if (m && m.type === 'tag') $('guildTagContainer').innerHTML = m.html;       // userData.guildTag -> innerHTML, exactly like the site
+  });
+  try { parent.postMessage({ type: 'ready' }, '*'); } catch (_) {}
+</script>
+</body>
+</html>
