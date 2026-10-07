@@ -151,6 +151,7 @@ let hearts = 'few';                      // global setting: none / few / all ani
 const effLevel = () => hearts;           // few = a yellow and a blue heart flanking the banner, all = that pair plus small floating hearts
 const tagHtml = t => t.levels ? t.levels[effLevel(t)] : t.html;
 const html = (t, comp) => withComp(tagHtml(t), comp);
+const sizeRef = (t, comp) => t.levels ? withComp(t.levels.few, comp) : null;
 
 
 const $ = s => document.querySelector(s);
@@ -187,10 +188,13 @@ function sizeOf(t) {
            tip: h.length.toLocaleString() + ' characters \u00b7 ' + (h.length / GYCRA * 100).toFixed(1) + '% of the largest tag known to be accepted (' + GYCRA.toLocaleString() + ' characters)' };
 }
 
-function mount(host, markup, maxW) {
-  host.innerHTML = '<div class="fit">' + markup + '</div>';
+// sizeAs: markup whose width decides the scale. Passing the 'few' version keeps a tag the same size on screen whatever the hearts
+// setting is (without it the narrower no-hearts classic tags were scaled down less and looked bigger).
+function mount(host, markup, maxW, sizeAs) {
+  host.innerHTML = '<div class="fit">' + (sizeAs || markup) + '</div>';
   const fit = host.firstChild;
   const avail = (maxW || host.clientWidth) - 24, w = fit.offsetWidth || 1;
+  if (sizeAs) fit.innerHTML = markup;
   fit.style.transform = w > avail ? 'scale(' + (avail / w) + ')' : '';
 }
 let hl = false;
@@ -221,7 +225,7 @@ function renderSample(sec) {
   if (!t) { host.innerHTML = '<span style="color:var(--muted);font-size:13px">Coming soon</span>'; return; }      // empty section
   head._rest = REST[t.n] || REST_DEFAULT;
   const maxW = head.clientWidth < 640 ? head.clientWidth - 40 : Math.min(head.clientWidth * 0.5, 560);
-  mount(host, html(t, comp), maxW);
+  mount(host, html(t, comp), maxW, sizeRef(t, comp));
   head.onmouseenter = () => { if (hl) setSvgPaused(host, false); };
   head.onmouseleave = () => { if (hl) setSvgPaused(host, true, head._rest); };
 }
@@ -242,7 +246,7 @@ function renderCards(sec, animate) {
       c.style.animationDelay = (i * STAGGER).toFixed(2) + 's';
     }
     const stage = c.querySelector('.stage'); c._rest = REST[t.n] || REST_DEFAULT;
-    mount(stage, html(t, comp));
+    mount(stage, html(t, comp), 0, sizeRef(t, comp));
     c.onmouseenter = () => { if (hl) setSvgPaused(stage, false); };
     c.onmouseleave = () => { if (hl) setSvgPaused(stage, true, c._rest); };
     c.onclick = () => openModal(t);
@@ -287,7 +291,7 @@ function openModal(t) {
 }
 function refreshModal() {
   const h = html(current, comp);
-  mount($('#big'), h, $('#big').clientWidth);
+  mount($('#big'), h, $('#big').clientWidth, sizeRef(current, comp));
   $('#code').value = h; $('#mcount').textContent = (new TextEncoder().encode(h).length / 1024).toFixed(1) + ' KB \u00b7 ' + h.length.toLocaleString() + ' characters';
   $('#copy').textContent = 'Copy HTML'; $('#copy').dataset.label = '';
 }
