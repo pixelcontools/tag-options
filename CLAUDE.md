@@ -8,5 +8,6 @@ Gallery of guild-tag options for geopixels.net (GitHub Pages from `docs/`).
 Quick rules:
 - `docs/index.html` is generated: edit `tools/index.template.html` / `tools/build.py`, then run `python tools/build.py`.
 - Options keep their numbers; never renumber.
+- Companion images (the dropdown) are made with `tools/art/make_companion.py`; `docs/tags/with-*/` folders are generated, never hand-edited.
 - Windows PowerShell 5.1: no `&&`; no double quotes inside commit messages.
 - Commit regenerated `docs/index.html` together with `docs/tags/` changes; push to `main` (Pages rebuilds in about a minute).

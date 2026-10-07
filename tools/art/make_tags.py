@@ -1,4 +1,5 @@
-"""Build tag HTML for the PNG scenes with and without the heart pair (none / pair) and update docs/tags.
+"""Build tag HTML for the PNG scenes with and without the heart pair (none / pair) and update docs/tags (plain/ + manifest.json).
+The with-<companion>/ folders are produced by `python tools/build.py`.
 
     python make_tags.py <scenes_dir> <repo_root>
 """
@@ -55,29 +56,26 @@ def build(png_bytes, count, band, seed):
 
 def main(scenes_dir, root):
     tags = os.path.join(root, 'docs', 'tags')
-    roll = open(os.path.join(tags, 'roll.html'), encoding='utf-8').read()
-    wrap = lambda h: ('<div style="display: inline-flex; align-items: center">' + h +
-                      '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + roll + '</span></div>')
     man = json.load(open(os.path.join(tags, 'manifest.json'), encoding='utf-8'))
     man = [m for m in man if m['n'] not in {s[1] for s in SCENES}]
     for fname, n, name, desc, band in SCENES:
         png = open(os.path.join(scenes_dir, fname), 'rb').read()
         slug = re.sub(r'[^a-z0-9]+', '_', name.lower()).strip('_')      # no colons etc. in file names
-        for stale in ('few', 'many'):
-            for sub in ('plain', 'with-roll'):
-                p = os.path.join(tags, sub, f'{n:02d}_{slug}_hearts_{stale}.html')
-                if os.path.exists(p):
-                    os.remove(p)
+        for stale in ('few', 'many'):                                    # older heart-count variants
+            p = os.path.join(tags, 'plain', f'{n:02d}_{slug}_hearts_{stale}.html')
+            if os.path.exists(p):
+                os.remove(p)
         files = {}
         for lvl, count in LEVELS.items():
             html = build(png, count, band, n * 31)
             f = f'{n:02d}_{slug}_hearts_{lvl}.html'
-            for sub, h in (('plain', html), ('with-roll', wrap(html))):
-                open(os.path.join(tags, sub, f), 'w', encoding='utf-8', newline='\n').write(h)
+            with open(os.path.join(tags, 'plain', f), 'w', encoding='utf-8', newline=chr(10)) as fh:
+                fh.write(html)
             files[lvl] = f
-            print(f'{name:14} {lvl:5} {len(html):6} chars  (+roll {len(wrap(html))})')
+            print(f'{name:30} {lvl:5} {len(html):6} chars')
         man.append({'n': n, 'name': name, 'desc': desc, 'levels': files})
     json.dump(man, open(os.path.join(tags, 'manifest.json'), 'w', encoding='utf-8'), indent=1, ensure_ascii=False)
+    print('next: python tools/build.py   (writes the page and the with-<companion>/ folders)')
 
 
 if __name__ == '__main__':

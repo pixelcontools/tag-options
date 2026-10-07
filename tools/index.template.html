@@ -61,7 +61,7 @@ footer a{color:inherit}
   then paste it into your guild settings &rarr; <i>Tag</i> field.</p>
 </header>
 <div id="bar">
-  <div class="grp"><label class="sw"><input type="checkbox" id="rollToggle" checked> Include Roll image</label></div>
+  <div class="grp"><label class="sw" title="An image drawn to the right of every tag. Choose None for the tag alone."><span>Companion image</span> <select id="compSel"></select></label></div>
   <div class="grp"><label class="sw" title="Adds a yellow heart on the left and a blue heart on the right of the scene tags (24-28)"><input type="checkbox" id="heartsToggle" checked> Extra hearts</label></div>
   <div class="grp"><label class="sw" title="When ticked, only the tag under your cursor (or open in the popup) animates"><input type="checkbox" id="hlToggle"> Animate highlighted</label></div>
   <div class="grp"><span>Background:</span>
@@ -74,7 +74,7 @@ footer a{color:inherit}
 <div id="modal"><div id="dlg" role="dialog" aria-modal="true">
   <div class="hd"><div><b id="mtitle"></b><span id="mdesc"></span></div><button id="x" aria-label="Close">&times;</button></div>
   <div id="big"></div>
-  <div id="mrow"><label class="sw"><input type="checkbox" id="mroll"> Include Roll image</label>
+  <div id="mrow"><label class="sw"><span>Companion image</span> <select id="mcomp"></select></label>
     <span id="mhwrap" style="display:flex;align-items:center;gap:8px"><label class="sw"><input type="checkbox" id="mhon"> Extra hearts</label></span></div>
   <textarea id="code" readonly spellcheck="false"></textarea>
   <div id="mfoot"><button id="copy">Copy HTML</button><button id="dl">Download .html</button><span id="mcount"></span></div>
@@ -82,18 +82,26 @@ footer a{color:inherit}
 
 <script>
 const TAGS = @@TAGS@@;
-const ROLL = @@ROLL@@;
-const withRoll = h => '<div style="display: inline-flex; align-items: center">' + h +
-  '<span style="position: relative; display: inline-block; width: 97px; height: 84px">' + ROLL + '</span></div>';
+const COMPS = @@COMPS@@;                 // companion images: [{id, name, w, h, html}], from docs/tags/companions/
+const compById = id => COMPS.find(c => c.id === id);
+const withComp = (h, id) => {
+  const c = compById(id);
+  return c ? '<div style="display: inline-flex; align-items: center">' + h +
+    '<span style="position: relative; display: inline-block; width: ' + c.w + 'px; height: ' + c.h + 'px">' + c.html + '</span></div>' : h;
+};
 let hearts = true;                       // global switch: off shows every scene tag without its extra hearts
 const effLevel = () => hearts ? 'pair' : 'none';      // scene tags: a yellow and a blue heart flanking the banner, or none
 const tagHtml = t => t.levels ? t.levels[effLevel(t)] : t.html;
-const html = (t, roll) => roll ? withRoll(tagHtml(t)) : tagHtml(t);
+const html = (t, comp) => withComp(tagHtml(t), comp);
 
 
 const $ = s => document.querySelector(s);
-const grid = $('#grid'), rollToggle = $('#rollToggle'), mroll = $('#mroll');
-let roll = true, current = null;
+const grid = $('#grid'), compSel = $('#compSel'), mcomp = $('#mcomp');
+let comp = compById('roll') ? 'roll' : '', current = null;     // '' = no companion image
+for (const sel of [compSel, mcomp]) {
+  sel.innerHTML = '<option value="">None</option>' + COMPS.map(c => '<option value="' + c.id + '">' + c.name + '</option>').join('');
+  sel.value = comp;
+}
 
 function mount(host, markup, maxW) {
   host.innerHTML = '<div class="fit">' + markup + '</div>';
@@ -122,25 +130,25 @@ function renderGrid() {
     c.querySelector('span').textContent = t.desc;
     grid.appendChild(c);
     const stage = c.querySelector('.stage'); c._rest = REST[t.n] || REST_DEFAULT;
-    mount(stage, html(t, roll));
+    mount(stage, html(t, comp));
     c.onmouseenter = () => { if (hl) setSvgPaused(stage, false); };
     c.onmouseleave = () => { if (hl) setSvgPaused(stage, true, c._rest); };
     c.onclick = () => openModal(t);
-    // quick actions on the card itself; they always use the real (box-shadow) HTML, never the grid's bitmap preview
-    c.querySelector('.cc').onclick = e => { e.stopPropagation(); copyText(html(t, roll), e.target); };
-    c.querySelector('.cd').onclick = e => { e.stopPropagation(); downloadHtml(t, roll); };
+    // quick actions on the card itself; they use exactly the HTML you would paste
+    c.querySelector('.cc').onclick = e => { e.stopPropagation(); copyText(html(t, comp), e.target); };
+    c.querySelector('.cd').onclick = e => { e.stopPropagation(); downloadHtml(t, comp); };
   });
   applyHighlightMode();
 }
 function openModal(t) {
-  current = t; mroll.checked = roll;
+  current = t; mcomp.value = comp;
   $('#mhwrap').style.display = t.levels ? '' : 'none';
   $('#mhon').checked = hearts;
   $('#mtitle').textContent = t.label; $('#mdesc').textContent = t.desc;
   $('#modal').classList.add('open'); refreshModal();
 }
 function refreshModal() {
-  const h = html(current, mroll.checked);
+  const h = html(current, comp);
   mount($('#big'), h, $('#big').clientWidth);
   $('#code').value = h; $('#mcount').textContent = h.length.toLocaleString() + ' characters';
   $('#copy').textContent = 'Copy HTML'; $('#copy').dataset.label = '';
@@ -149,14 +157,15 @@ const close = () => $('#modal').classList.remove('open');
 $('#x').onclick = close;
 $('#modal').onclick = e => { if (e.target.id === 'modal') close(); };
 document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
-// One shared setting: the top toggle and the modal checkbox always agree, so the code you copy matches the preview.
-function setRoll(v) {
-  roll = v; rollToggle.checked = v; mroll.checked = v;
+// One shared setting: the top dropdown and the popup dropdown always agree, so the code you copy matches the preview.
+function setComp(id) {
+  comp = id; compSel.value = id; mcomp.value = id;
   renderGrid();
   if (current && $('#modal').classList.contains('open')) refreshModal();
 }
-mroll.onchange = () => setRoll(mroll.checked);
-// One shared hearts switch, mirrored in the top bar and the popup (same idea as the Roll toggle).
+compSel.onchange = () => setComp(compSel.value);
+mcomp.onchange = () => setComp(mcomp.value);
+// One shared hearts switch, mirrored in the top bar and the popup (same idea as the companion dropdown).
 function setHearts(v) {
   hearts = v; $('#heartsToggle').checked = v; $('#mhon').checked = v;
   renderGrid();
@@ -166,7 +175,6 @@ function setHearts(v) {
 }
 $('#heartsToggle').onchange = e => setHearts(e.target.checked);
 $('#mhon').onchange = e => setHearts(e.target.checked);
-rollToggle.onchange = () => setRoll(rollToggle.checked);
 $('#hlToggle').onchange = e => { hl = e.target.checked; applyHighlightMode(); };
 async function copyText(text, btn) {
   try { await navigator.clipboard.writeText(text); }
@@ -177,19 +185,19 @@ async function copyText(text, btn) {
   const old = btn.dataset.label || btn.textContent; btn.dataset.label = old;
   btn.textContent = 'Copied!'; clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = old; }, 1400);
 }
-function fileName(t, withRollFlag) {
+function fileName(t, compId) {
   const name = t.label.replace(/^\d+\.\s*/, '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-  return String(t.n).padStart(2, '0') + '_' + name + (t.levels ? '_hearts_' + effLevel(t) : '') + (withRollFlag ? '_with_roll' : '') + '.html';
+  return String(t.n).padStart(2, '0') + '_' + name + (t.levels ? '_hearts_' + effLevel(t) : '') + (compId ? '_with_' + compId : '') + '.html';
 }
-function downloadHtml(t, withRollFlag) {
-  const blob = new Blob([html(t, withRollFlag)], { type: 'text/html;charset=utf-8' });
+function downloadHtml(t, compId) {
+  const blob = new Blob([html(t, compId)], { type: 'text/html;charset=utf-8' });
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = fileName(t, withRollFlag);
+  a.href = URL.createObjectURL(blob); a.download = fileName(t, compId);
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 2000);
 }
 $('#copy').onclick = () => copyText($('#code').value, $('#copy'));
-$('#dl').onclick = () => downloadHtml(current, mroll.checked);
+$('#dl').onclick = () => downloadHtml(current, comp);
 document.querySelectorAll('[data-bg]').forEach(b => b.onclick = () => {
   document.body.className = b.dataset.bg;
   document.querySelectorAll('[data-bg]').forEach(x => x.classList.toggle('on', x === b));
