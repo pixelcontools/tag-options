@@ -22,6 +22,15 @@ SCENES = [
     ('citypop.png', 28, 'Pixel City Pop', 'Retro Japan, 80s city pop: a white Countach cruises an elevated road above a pastel Tokyo skyline with street lights and a bus stop, toward a sign with a heart-shaped sobbing face and an arrow. Katakana (ピクセルコンズ) runs down the side.', (12, 37)),
     ('citypop2.png', 29, 'Pixel City Pop: Gold to Blue', 'City Pop again, but the whole scene follows the guild gradient: golden hour on the left cooling to blue on the right, down to the skyline, road tint and lamp glow.', (12, 37)),
     ('sky.png', 27, 'Pixel Sky', 'Bright sky islands with trees, a little red-roofed house and drifting clouds.', (25, 50)),
+    # holiday styles (tools/art/holidays.py), numbered from 100
+    ('halloween.png', 100, 'Halloween', 'Purple dusk with a harvest moon, bats, a haunted house, a dead tree and grinning pumpkins; the wordmark glows pumpkin orange with slime-green XEL.', (27, 52)),
+    ('christmas.png', 101, 'Christmas', 'A snowy night with lit pine trees, presents in the snow and a warm glow behind a red and green wordmark.', (27, 52)),
+    ('nye.png', 102, "New Year's Eve", 'Midnight over a gold-windowed skyline with fireworks, confetti and a golden wordmark.', (27, 52)),
+    ('valentine.png', 103, "Valentine's Day", 'A pink sunset sky full of pixel hearts around a white wordmark with a rose outline.', (27, 52)),
+    ('lunar.png', 104, 'Lunar New Year', 'Red and gold: hanging paper lanterns, gold wave patterns along the bottom and a golden wordmark.', (27, 52)),
+    ('easter.png', 105, 'Easter', 'A pastel sky and a green meadow with decorated eggs, flowers and a rainbow-pastel wordmark.', (27, 52)),
+    ('sakura.png', 106, 'Spring Sakura', 'A soft pink sky with cherry blossom branches, drifting petals and a distant snow-capped mountain.', (27, 52)),
+    ('july4.png', 107, 'Independence Day', 'Night-time fireworks over a lake and treeline with a red, white and blue wordmark (US Fourth of July).', (27, 52)),
 ]
 
 

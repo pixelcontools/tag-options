@@ -198,5 +198,85 @@
    "few": "27_pixel_sky_hearts_few.html",
    "all": "27_pixel_sky_hearts_all.html"
   }
+ },
+ {
+  "n": 100,
+  "name": "Halloween",
+  "desc": "Purple dusk with a harvest moon, bats, a haunted house, a dead tree and grinning pumpkins; the wordmark glows pumpkin orange with slime-green XEL.",
+  "levels": {
+   "none": "100_halloween_hearts_none.html",
+   "few": "100_halloween_hearts_few.html",
+   "all": "100_halloween_hearts_all.html"
+  }
+ },
+ {
+  "n": 101,
+  "name": "Christmas",
+  "desc": "A snowy night with lit pine trees, presents in the snow and a warm glow behind a red and green wordmark.",
+  "levels": {
+   "none": "101_christmas_hearts_none.html",
+   "few": "101_christmas_hearts_few.html",
+   "all": "101_christmas_hearts_all.html"
+  }
+ },
+ {
+  "n": 102,
+  "name": "New Year's Eve",
+  "desc": "Midnight over a gold-windowed skyline with fireworks, confetti and a golden wordmark.",
+  "levels": {
+   "none": "102_new_year_s_eve_hearts_none.html",
+   "few": "102_new_year_s_eve_hearts_few.html",
+   "all": "102_new_year_s_eve_hearts_all.html"
+  }
+ },
+ {
+  "n": 103,
+  "name": "Valentine's Day",
+  "desc": "A pink sunset sky full of pixel hearts around a white wordmark with a rose outline.",
+  "levels": {
+   "none": "103_valentine_s_day_hearts_none.html",
+   "few": "103_valentine_s_day_hearts_few.html",
+   "all": "103_valentine_s_day_hearts_all.html"
+  }
+ },
+ {
+  "n": 104,
+  "name": "Lunar New Year",
+  "desc": "Red and gold: hanging paper lanterns, gold wave patterns along the bottom and a golden wordmark.",
+  "levels": {
+   "none": "104_lunar_new_year_hearts_none.html",
+   "few": "104_lunar_new_year_hearts_few.html",
+   "all": "104_lunar_new_year_hearts_all.html"
+  }
+ },
+ {
+  "n": 105,
+  "name": "Easter",
+  "desc": "A pastel sky and a green meadow with decorated eggs, flowers and a rainbow-pastel wordmark.",
+  "levels": {
+   "none": "105_easter_hearts_none.html",
+   "few": "105_easter_hearts_few.html",
+   "all": "105_easter_hearts_all.html"
+  }
+ },
+ {
+  "n": 106,
+  "name": "Spring Sakura",
+  "desc": "A soft pink sky with cherry blossom branches, drifting petals and a distant snow-capped mountain.",
+  "levels": {
+   "none": "106_spring_sakura_hearts_none.html",
+   "few": "106_spring_sakura_hearts_few.html",
+   "all": "106_spring_sakura_hearts_all.html"
+  }
+ },
+ {
+  "n": 107,
+  "name": "Independence Day",
+  "desc": "Night-time fireworks over a lake and treeline with a red, white and blue wordmark (US Fourth of July).",
+  "levels": {
+   "none": "107_independence_day_hearts_none.html",
+   "few": "107_independence_day_hearts_few.html",
+   "all": "107_independence_day_hearts_all.html"
+  }
  }
 ]
