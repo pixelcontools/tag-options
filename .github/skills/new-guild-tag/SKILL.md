@@ -101,7 +101,7 @@ Note any margin offset: the grid origin is not always at 0 (heartsob v2 started 
 1. In `tools/art/make_tags.py`, add a tuple to `SCENES`: `('myscene.png', N, 'Pixel Name', 'one-sentence description', (band_y0, band_y1))`.
    **Names: letters, numbers, spaces only is safest.** A colon in a name produced broken files on Windows (NTFS alternate stream); slugs are now sanitised with a regex, but keep names clean anyway.
 2. Run `python tools/art/make_tags.py <scratch dir with the PNGs> .` (repo root). This writes, per scene, `NN_slug_hearts_none.html` and `..._hearts_few.html` and `..._hearts_all.html` into `docs/tags/plain/`
-   and updates `docs/tags/manifest.json`. It also deletes stale `_few/_many` files.
+   and updates `docs/tags/manifest.json`. It also deletes stale `_pair/_many` files.
 3. `python tools/build.py` regenerates `docs/index.html` **and** every `docs/tags/with-<id>/` folder (one per companion image). The page sorts by number. Never write `with-*` files by hand.
 4. Text-style (non-PNG) tags and Pixel Dawn were assembled outside `make_tags.py`: put the final HTML in `docs/tags/plain/NN_slug.html`, add a manifest entry
    `{"n": N, "name": ..., "desc": ..., "file": "NN_slug.html"}`, then `build.py` (it makes the with-<id> versions). For SVG/SMIL text effects see section 5.
