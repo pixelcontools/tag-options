@@ -22,6 +22,8 @@ SCENES = [
     ('citypop.png', 28, 'Pixel City Pop', 'Retro Japan, 80s city pop: a white Countach cruises an elevated road above a pastel Tokyo skyline with street lights and a bus stop, toward a sign with a heart-shaped sobbing face and an arrow. Katakana (ピクセルコンズ) runs down the side.', (12, 37)),
     ('citypop2.png', 29, 'Pixel City Pop: Gold to Blue', 'City Pop again, but the whole scene follows the guild gradient: golden hour on the left cooling to blue on the right, down to the skyline, road tint and lamp glow.', (12, 37)),
     ('sky.png', 27, 'Pixel Sky', 'Bright sky islands with trees, a little red-roofed house and drifting clouds.', (25, 50)),
+    # franchise-themed scenes (tools/art/themed.py)
+    ('namek.png', 30, 'Planet Namek', 'Dragon Ball Z style: a green-to-yellow Namek sky with pale suns, a striped planet, tall pink-purple cliffsides with blue grass, a blue sea and white domes; Dragon Ball Z style lettering (Saiyan Sans) in bright yellow with red XEL and a Dragon Ball for the O.', (22, 64)),
     # holiday styles (tools/art/holidays.py), numbered from 100
     ('halloween.png', 100, 'Halloween', 'Purple dusk with a harvest moon, bats, a haunted house, a dead tree and grinning pumpkins; the wordmark glows pumpkin orange with slime-green XEL.', (27, 52)),
     ('christmas.png', 101, 'Christmas', 'A snowy night with lit pine trees, presents in the snow and a warm glow behind a red and green wordmark.', (27, 52)),

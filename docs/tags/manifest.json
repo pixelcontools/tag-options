@@ -200,6 +200,16 @@
   }
  },
  {
+  "n": 30,
+  "name": "Planet Namek",
+  "desc": "Dragon Ball Z style: a green-to-yellow Namek sky with pale suns, a striped planet, tall pink-purple cliffsides with blue grass, a blue sea and white domes; Dragon Ball Z style lettering (Saiyan Sans) in bright yellow with red XEL and a Dragon Ball for the O.",
+  "levels": {
+   "none": "30_planet_namek_hearts_none.html",
+   "few": "30_planet_namek_hearts_few.html",
+   "all": "30_planet_namek_hearts_all.html"
+  }
+ },
+ {
   "n": 100,
   "name": "Halloween",
   "desc": "Purple dusk with a harvest moon, bats, a haunted house, a dead tree and grinning pumpkins; the wordmark glows pumpkin orange with slime-green XEL.",

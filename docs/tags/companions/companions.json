@@ -16,6 +16,14 @@
   "chars": 4331
  },
  {
+  "id": "chichi",
+  "name": "Chichi",
+  "file": "chichi.html",
+  "w": 45,
+  "h": 84,
+  "chars": 4503
+ },
+ {
   "id": "fallenshadow",
   "name": "Fallenshadow",
   "file": "fallenshadow.html",
